@@ -1,0 +1,24 @@
+   #Use this file to automatically override the base docker-compose.yml file.
+    #Whatever you put in here should be meant for development purposes only.
+    #when calling docker-compose up, docker-compose will automatically read the
+    #original docker-compose.yml file and then appli the overrides defined in here.
+
+    version: '3.8'
+
+    services:
+        db:
+            ports:
+                - "5432:5432"
+        web:
+            #Using DJango web server for easy debugging
+            command: python ./webserver/django/manage.py runserver 0.0.0.0:80
+            volumes:
+                #This will map your dev environment into the container so you
+                #won't need to rebuild the container at each code change. It will map
+                #the entire project so if you use VS Code yu will be able to attach to
+                #the container and use Git-related resources.
+                - .:/service
+            ports:
+                - "8000:80"
+            environment:
+                DEBUG: 'true'

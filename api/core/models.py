@@ -1,26 +1,26 @@
 from django.db import models
 from . import file_reader
 
-
-class DadosMontgomery(models.Model):
-    def images():
-        lista_dados = []
-        images_list = []
-        for file in file_reader.DataMontgomery:
-            lista_dados.append(file)
-        for file_index in range(len(lista_dados)):
-            images = {'metadata': {'id': file_index, 'filename':str(lista_dados[file_index].filename), 'has_tb':'', 'original_report': str(lista_dados[file_index].report)}}
-            images_list.append(images)
-        return images_list
-    database = 'Montgomery'
-    count = len(file_reader.montgomery_general_data_list)#Number of images
-    image_formats = ["png"] #list of image_formats
-    dados = str(file_reader.montgomery_general_data_list)
-    images = images()
-
+class DataSet(models.Model):
+    database = models.CharField(max_length = 50)
+    count = models.IntegerField()
+    image_formats = models.ManyToManyField('self')
 
     def __str__(self):
         return self.database
 
-class DadosChina(models.Model):
-    pass
+class Image(models.Model):
+    dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
+    image_path = models.CharField(max_length = 50)
+
+    def __str__(self):
+        return self.dataset
+
+class ImageMetaData(models.Model):
+    dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
+    image = models.ForeignKey(Image, on_delete=models.CASCADE,)
+    has_tb = models.BooleanField()
+    original_report = models.CharField(max_length = 50)
+
+    def __str__(self):
+        return self.image

@@ -2,7 +2,7 @@
 import glob
 import re
 
-montgomery_data_path = "C:/Users/ms-lu/Desktop/Lucca/IC/DQ/dorothy-image-service/api/core/MontgomerySet/ClinicalReadings/*.txt"
+montgomery_data_path = "C:/Users/ms-lu/Desktop/Lucca/IC/DQ/MontgomerySet/ClinicalReadings/*.txt"
 chinese_data_path = ''
 
 montgomery_files = glob.glob(montgomery_data_path)

@@ -1,20 +1,31 @@
 from django.db import models
 from . import file_reader
 
+
+class Formats(models.Model):
+    formats = models.CharField(max_length=30)
+
+    class Meta:
+        ordering = ['formats']
+
+    def __str__(self):
+        return self.formats
+
 class DataSet(models.Model):
-    database = models.CharField(max_length = 50)
-    count = models.IntegerField()
-    image_formats = models.ManyToManyField('self')
+    database = models.CharField("Data base name", max_length = 50)
+    count = models.IntegerField() #Deixar de lado por hora
+    image_formats = models.ManyToManyField(Formats, verbose_name = 'list of formats') #Deixar de lado por hora
 
     def __str__(self):
         return self.database
+
 
 class Image(models.Model):
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
     image_path = models.CharField(max_length = 50)
 
     def __str__(self):
-        return self.dataset
+        return self.dataset #Precisa de alteração
 
 class ImageMetaData(models.Model):
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)

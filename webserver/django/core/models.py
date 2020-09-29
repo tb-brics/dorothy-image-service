@@ -15,7 +15,7 @@ class Formats(models.Model):
 
 class DataSet(models.Model):
     """
-    Datasets class
+    
     """
     database = models.CharField("Data base name", max_length = 50)
     count = models.IntegerField() #Deixar de lado por hora
@@ -26,9 +26,6 @@ class DataSet(models.Model):
 
 
 class Image(models.Model):
-    """
-    Images class
-    """
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
     image_path = models.CharField(max_length = 50)
 
@@ -36,9 +33,6 @@ class Image(models.Model):
         return self.dataset #Precisa de alteração
 
 class ImageMetaData(models.Model):
-    """
-    Images MetaData class
-    """
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
     image = models.ForeignKey(Image, on_delete=models.CASCADE,)
     has_tb = models.BooleanField()

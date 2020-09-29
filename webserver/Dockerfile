@@ -32,3 +32,4 @@ RUN chown -R www-data:www-data /var/www/dorothy/static
 
 #Copying script that will start GUnicorn and NGinx web servers.
 COPY server/run_server.sh ./
+COPY server/gunicorn_config.py ./

@@ -8,3 +8,4 @@ pytest-django
 pytest-bdd
 pytest-xdist
 django-bootstrap4
+django-crispy-forms

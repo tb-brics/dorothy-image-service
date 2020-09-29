@@ -1,0 +1,54 @@
+# nginx.default
+
+server {
+    listen 80;
+    server_name dorothy;
+    location / {
+        return 301 https://$host$request_uri;
+    }
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name dorothy;
+
+    ssl_certificate /etc/nginx/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/nginx/certs/nginx-selfsigned.key;
+
+    # Disable any limits to avoid HTTP 413 for large image uploads
+    client_max_body_size 0;
+
+    # Required to avoid HTTP 411: see Issue #1486 (https://github.com/moby/moby/issues/1486)
+    chunked_transfer_encoding on;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    #Setupfor handling static contents.
+    #location must be the same as settings.STATIC_URL
+    #alias must be the same as settings.STATIC_ROOT.
+    location /static/ {
+        alias /var/www/dorothy/static/;
+    }
+
+    #Setup for handling media (protected x-ray images) files.
+    #location must be the same as settings.MEDIA_URL
+    #alias must be the same as settings.MEDIA_ROOT.
+    location /media/ {
+        internal;
+        alias /imagesrep/;
+    }
+
+    #Setup for dynamic (Django) content.
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    #Make sure that Gunicorn is saving to this same path.
+    access_log /var/log/dorothy/nginx-access.log;
+    error_log  /var/log/dorothy/nginx-error.log;
+}

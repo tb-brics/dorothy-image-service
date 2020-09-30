@@ -7,5 +7,6 @@ pytest
 pytest-django
 pytest-bdd
 pytest-xdist
+djangorestframework
 django-bootstrap4
 django-crispy-forms

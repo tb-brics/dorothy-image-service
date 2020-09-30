@@ -1,23 +1,23 @@
 version: '3.8'
 
-    services:
-        db:
-            image: postgres
-            environment:
-                - POSTGRES_DB=postgres
-                - POSTGRES_USER=postgres
-                - POSTGRES_PASSWORD=R2E)5Dqd5ixizrU>+[mR
-            volumes:
-                - PostgresDB:/var/lib/postgresql/data
-        web:
-            build: ./webserver
-            command: ./run_server.sh
-            volumes:
-                - ImagesRep:/imagesrep
-            depends_on:
-                - db
-
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=R2E)5Dqd5ixizrU>+[mR
     volumes:
-        PostgresDB:
-        ImagesRep:
+        - PostgresDB:/var/lib/postgresql/data
+  web:
+    build: ./webserver
+    command: ./run_server.sh
+    volumes:
+      - ImagesRep:/imagesrep
+    depends_on:
+      - db
+
+volumes:
+    PostgresDB:
+    ImagesRep:
     

@@ -1,42 +1,31 @@
+"""Importing models module to create models classes"""
 from django.db import models
 
 
-class Formats(models.Model):
-    """
-    class for defining  image formats available
-    """
-    formats = models.CharField(max_length=30)
-
-    class Meta:
-        ordering = ['formats']
-
-    def __str__(self):
-        return self.formats
-
 class DataSet(models.Model):
-    """
-    
-    """
+    """Class for datasets"""
     database = models.CharField("Data base name", max_length = 50)
-    count = models.IntegerField() #Deixar de lado por hora
-    image_formats = models.ManyToManyField(Formats, verbose_name = 'list of formats')
+    count = models.IntegerField()
+    image_formats = models.CharField(max_length = 50, default="")
 
     def __str__(self):
-        return self.database
+        return str(self.database)
 
 
 class Image(models.Model):
+    """Class for images"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
     image_path = models.CharField(max_length = 50)
 
     def __str__(self):
-        return self.dataset #Precisa de alteração
+        return str(self.dataset)
 
 class ImageMetaData(models.Model):
+    """Class for the meta data"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
     image = models.ForeignKey(Image, on_delete=models.CASCADE,)
     has_tb = models.BooleanField()
     original_report = models.CharField(max_length = 50)
 
     def __str__(self):
-        return self.image
+        return str(self.image)

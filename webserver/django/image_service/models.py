@@ -1,11 +1,9 @@
 """Importing models module to create models classes"""
 from django.db import models
 
-
 class DataSet(models.Model):
     """Class for datasets"""
-    database = models.CharField("Data base name", max_length = 50)
-    count = models.IntegerField()
+    database = models.CharField("Data base name", unique=True, max_length = 50)
     image_formats = models.CharField(max_length = 50, default="")
 
     def __str__(self):

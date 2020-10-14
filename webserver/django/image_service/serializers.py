@@ -4,7 +4,7 @@ from .models import DataSet, Image, ImageMetaData
 class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataSet
-        fields = ['database', 'count', 'image_formats']
+        fields = ['database', 'image_formats']
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:

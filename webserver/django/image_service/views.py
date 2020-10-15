@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import DataSet, Image, ImageMetaData
-from .serializers import DataSetSerializer, ImageSerializer, ImageMetaDataSerializer
+from .models import DataSet, Image, ImageMetaData, DataBase
+from .serializers import DataSetSerializer, ImageSerializer, ImageMetaDataSerializer, DataBaseSerializer
 # Create your views here.
 
 class DataSetViewSet(viewsets.ModelViewSet):
@@ -15,3 +15,7 @@ class ImageViewSet(viewsets.ModelViewSet):
 class ImageMetaDataViewSet(viewsets.ModelViewSet):
     queryset = ImageMetaData.objects.all()
     serializer_class = ImageMetaDataSerializer
+
+class DataBaseViewSet(viewsets.ModelViewSet):
+    queryset = DataBase.objects.all()
+    serializer_class = DataBaseSerializer

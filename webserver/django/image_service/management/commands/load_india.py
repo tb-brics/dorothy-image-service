@@ -3,11 +3,6 @@ from image_service.models import DataSet, Image, ImageMetaData
 from xrayreader.data import Dataset as xrd
 from optparse import make_option
 
-def check_report():
-    india_xrd = xrd(name='india', path="C:/Users/ms-lu/Desktop/Lucca/IC/DQ/IndianDataSet")
-    for index in range(len(india_xrd.get_data()['data']['images'])-1):
-        if india_xrd.get_data()['data']['metadata'][index].report == None:
-            return 0
 
 class Command(BaseCommand):
 
@@ -17,9 +12,13 @@ class Command(BaseCommand):
 
         india_xrd = xrd(name='india', path="C:/Users/ms-lu/Desktop/Lucca/IC/DQ/IndianDataSet")
 
+        list_of_formats = []
+        for index in range(len(india_xrd.get_data()['data']['images'])-1):
+            list_of_formats.append(india_xrd.get_data()['data']['images'][index].extension)
+
         dataset  = DataSet(
-            database=india_xrd.name,
-            image_formats= india_xrd.get_data()['data']['images'][0].extension
+            name=india_xrd.name,
+            image_formats= list_of_formats
         )
         dataset.save()
         self.stdout.write(self.style.SUCCESS('Added Dataset!'))
@@ -36,7 +35,7 @@ class Command(BaseCommand):
                 dataset= dataset,
                 image=image,
                 has_tb=india_xrd.get_data()['data']['metadata'][index].check_normality,
-                original_report= check_report()
+                original_report= india_xrd.get_data()['data']['metadata'][index].report
             )
             image_meta_data.save()
         self.stdout.write(self.style.SUCCESS(f"Added {len(india_xrd.get_data()['data']['images'])-1} Images!"))

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .models import DataSet, Image, ImageMetaData
 from .serializers import DataSetSerializer, ImageSerializer, ImageMetaDataSerializer
-# Create your views here.
+
 
 class DataSetViewSet(viewsets.ModelViewSet):
     queryset = DataSet.objects.all()

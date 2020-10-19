@@ -4,14 +4,19 @@ from .models import DataSet, Image, ImageMetaData
 class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataSet
-        fields = ['database', 'image_formats']
+        fields = ['name', 'image_formats']
 
 class ImageSerializer(serializers.ModelSerializer):
+    dataset_name = serializers.CharField(source="dataset.name", read_only=True)
+    image_path = serializers.CharField(source="image.image_path", read_only=True)
+
     class Meta:
         model = Image
-        fields = ['dataset', 'image_path']
+        fields = ['dataset_name', 'image_path']
 
 class ImageMetaDataSerializer(serializers.ModelSerializer):
+    dataset_name = serializers.CharField(source="dataset.name", read_only=True)
+
     class Meta:
         model = ImageMetaData
-        fields = ['dataset', 'image', 'has_tb', 'original_report']
+        fields = ['dataset_name', 'image', 'has_tb', 'original_report']

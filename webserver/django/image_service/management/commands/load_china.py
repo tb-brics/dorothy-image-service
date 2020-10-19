@@ -8,10 +8,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         china_xrd = xrd(name='china', path="C:/Users/ms-lu/Desktop/Lucca/IC/DQ/ChinaSet_AllFiles")
+        list_of_formats = []
+        for index in range(len(china_xrd.get_data()['data']['images'])-1):
+            list_of_formats.append(china_xrd.get_data()['data']['images'][index].extension)
 
         dataset = DataSet(
-            database=china_xrd.name,
-            image_formats=china_xrd.get_data()['data']['images'][0].extension
+            name=china_xrd.name,
+            image_formats=list_of_formats
         )
         dataset.save()
         self.stdout.write(self.style.SUCCESS('Added Dataset!'))

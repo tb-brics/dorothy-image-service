@@ -10,9 +10,15 @@ class Command(BaseCommand):
 
         montgomery_xrd = xrd(name='montgomery', path="C:/Users/ms-lu/Desktop/Lucca/IC/DQ/MontgomerySet")
 
+        list_of_formats = []
+        for index in range(len(montgomery_xrd.get_data()['data']['images'])-1):
+            list_of_formats.append(montgomery_xrd.get_data()['data']['images'][index].extension)
+
+
+
         dataset  = DataSet(
-            database=montgomery_xrd.name,
-            image_formats= montgomery_xrd.get_data()['data']['images'][0].extension
+            name=montgomery_xrd.name,
+            image_formats = list_of_formats
         )
         dataset.save()
         self.stdout.write(self.style.SUCCESS('Added Dataset!'))

@@ -4,9 +4,9 @@ from image_service.views import DataSetViewSet, ImageViewSet, ImageMetaDataViewS
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register(r'dataset', DataSetViewSet)
-router.register(r'image', ImageViewSet)
-router.register(r'image_meta_data', ImageMetaDataViewSet)
+router.register(r'datasets', DataSetViewSet)
+router.register(r'images', ImageViewSet)
+router.register(r'images_meta_data', ImageMetaDataViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

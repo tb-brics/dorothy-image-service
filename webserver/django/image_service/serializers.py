@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DataSet, Image, ImageMetaData, DataBase
+from .models import DataSet, Image, ImageMetaData
 
 class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,7 +16,3 @@ class ImageMetaDataSerializer(serializers.ModelSerializer):
         model = ImageMetaData
         fields = ['dataset', 'image', 'has_tb', 'original_report']
 
-class DataBaseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DataBase
-        fields = ['url' ,'image']

@@ -1,5 +1,7 @@
 """Importing models module to create models classes"""
-from django.db import models
+from django.db import models 
+from django.conf import settings
+import os
 
 class DataSet(models.Model):
     """Class for datasets"""
@@ -28,7 +30,3 @@ class ImageMetaData(models.Model):
     def __str__(self):
         return str(self.image)
 
-class DataBase(models.Model):
-    url = models.CharField(max_length = 200)
-    image = models.ForeignKey(Image, on_delete=models.CASCADE,)
-     

@@ -27,3 +27,8 @@ class ImageMetaData(models.Model):
 
     def __str__(self):
         return str(self.image)
+
+class DataBase(models.Model):
+    url = models.CharField(max_length = 200)
+    image = models.ForeignKey(Image, on_delete=models.CASCADE,)
+     

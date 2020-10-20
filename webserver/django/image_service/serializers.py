@@ -19,4 +19,3 @@ class ImageMetaDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageMetaData
         fields = ['dataset_name', 'image', 'has_tb', 'original_report']
-

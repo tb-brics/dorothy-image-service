@@ -15,7 +15,7 @@ class DataSet(models.Model):
 class Image(models.Model):
     """Class for images"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
-    image_path = models.CharField(max_length = 50)
+    image_path = models.Field
 
     def __str__(self):
         return str(self.dataset)
@@ -23,7 +23,7 @@ class Image(models.Model):
 class ImageMetaData(models.Model):
     """Class for the meta data"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
-    image = models.ForeignKey(Image, on_delete=models.CASCADE,)
+    image = models.ImageField(upload_to='static/static_dirs/image/')
     has_tb = models.BooleanField()
     original_report = models.CharField(max_length = 50)
 

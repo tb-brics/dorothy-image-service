@@ -15,4 +15,3 @@ class ImageViewSet(viewsets.ModelViewSet):
 class ImageMetaDataViewSet(viewsets.ModelViewSet):
     queryset = ImageMetaData.objects.all()
     serializer_class = ImageMetaDataSerializer
-

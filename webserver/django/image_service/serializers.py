@@ -16,7 +16,6 @@ class ImageSerializer(serializers.ModelSerializer):
 
 class ImageMetaDataSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name", read_only=True)
-
     class Meta:
         model = ImageMetaData
         fields = ['dataset_name', 'image', 'has_tb', 'original_report']

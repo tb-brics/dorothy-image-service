@@ -30,6 +30,10 @@ COPY django ./
 RUN mkdir -p /var/www/dorothy/static
 RUN chown -R www-data:www-data /var/www/dorothy/static
 
+#Creating folder for dorothy logs
+RUN mkdir -p /var/log/dorothy
+RUN chown -R www-data:www-data /var/log/dorothy
+
 #Copying script that will start GUnicorn and NGinx web servers.
 COPY server/run_server.sh ./
 COPY server/gunicorn_config.py ./

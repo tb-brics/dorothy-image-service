@@ -23,7 +23,7 @@ class Image(models.Model):
 class ImageMetaData(models.Model):
     """Class for the meta data"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE,)
-    image = models.ImageField(upload_to='static/static_dirs/image/')
+    image = models.ImageField(upload_to='static/imageservice/image/')
     has_tb = models.BooleanField()
     original_report = models.CharField(max_length = 50, null=True)
 

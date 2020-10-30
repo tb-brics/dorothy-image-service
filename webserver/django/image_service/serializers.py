@@ -8,8 +8,7 @@ class DataSetSerializer(serializers.ModelSerializer):
 
 class ImageSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name", read_only=True)
-    image_path = serializers.CharField(source="image.image_path", read_only=True)
-
+    
     class Meta:
         model = Image
         fields = ['dataset_name', 'image_path']

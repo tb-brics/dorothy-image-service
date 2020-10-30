@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from image_service.models import DataSet, Image, ImageMetaData
 from xrayreader.data import Dataset as xrd
+import os.path
 from optparse import make_option
 
 class Command(BaseCommand):
@@ -27,13 +28,13 @@ class Command(BaseCommand):
         for index in range(len(dataset_xrd.get_data()['data']['images'])-1):
             image = Image(
                 dataset = dataset,
-                image_path = dataset_xrd.get_data()['data']['images'][index].path
+                image_path = os.path.join(dataset_xrd.get_data()['data']['images'][index].path, f"{dataset_xrd.get_data()['data']['images'][index].imagename}.{dataset_xrd.get_data()['data']['images'][index].extension}")
         )
             image.save()
 
             image_meta_data = ImageMetaData(
                 dataset=dataset,
-                image=image,
+                image=image.image_path,
                 has_tb=dataset_xrd.get_data()['data']['metadata'][index].check_normality,
                 original_report=dataset_xrd.get_data()['data']['metadata'][index].report
             )

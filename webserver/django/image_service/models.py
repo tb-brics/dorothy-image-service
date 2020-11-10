@@ -2,6 +2,7 @@
 from django.db import models
 from django.conf import settings
 import os
+import uuid
 
 
 class DataSet(models.Model):
@@ -17,6 +18,15 @@ class Image(models.Model):
     """Class for images"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='static/image_service/image/')
+
+    @property
+    def image_id(self):
+        dataset_name = self.dataset.name.tolower().replace('_','')
+        image_filename = os.path.basename(self.image.name).tolower().replace('_','')
+        hashcode = uuid.uuid4()
+        return f"{dataset_name[:5]}_{imagefilename}{hascode[:6]}"
+
+   
 
 
 class ImageMetaData(models.Model):

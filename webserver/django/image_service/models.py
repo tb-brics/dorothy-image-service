@@ -19,12 +19,14 @@ class Image(models.Model):
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='static/image_service/image/')
 
-    @property
-    def image_id(self):
+    
+    def save(self, *args, **kwargs):
         dataset_name = self.dataset.name.tolower().replace('_','')
         image_filename = os.path.basename(self.image.name).tolower().replace('_','')
         hashcode = uuid.uuid4()
-        return f"{dataset_name[:5]}_{imagefilename}{hascode[:6]}"
+        self.project_id = f"{self.name'_'self.image_formats'}
+        super(Image, self).save(*args, **kwargs)
+
 
    
 

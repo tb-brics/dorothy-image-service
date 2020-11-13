@@ -24,11 +24,9 @@ class Image(models.Model):
         dataset_name = self.dataset.name.tolower().replace('_','')
         image_filename = os.path.basename(self.image.name).tolower().replace('_','')
         hashcode = uuid.uuid4()
-        self.project_id = f"{self.name'_'self.image_formats'}
+        self.project_id = f"{'self.name'_'self.image_formats'}"
         super(Image, self).save(*args, **kwargs)
-
-
-   
+        console.log("testesave")
 
 
 class ImageMetaData(models.Model):

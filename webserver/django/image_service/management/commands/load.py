@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from image_service.models import DataSet, Image, ImageMetaData
 from xrayreader.data import Dataset as xrd
 import os.path
+import uuid
 from optparse import make_option
 
 class Command(BaseCommand):

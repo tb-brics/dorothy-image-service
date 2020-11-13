@@ -35,7 +35,7 @@ For the curent datasets, Indian, Chinese and Montgomery the paths should end in 
 
 Example: python manage.py load montgomery/imagesrep/MontgomerySet
 
-The inside container dataset_path can be rewritten as /imagesrep/<dataset_folder_name>.
+The inside container dataset_path can be rewritten as /imagesrep/<dataset_folder_name>
 
 
 

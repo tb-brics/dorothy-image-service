@@ -23,17 +23,6 @@ class Image(models.Model):
     project_id = models.CharField(max_length = 100)
 
 
-    # def save(self, *args, **kwargs):
-    #     dataset_name = self.dataset.name.lower().replace('_','')
-    #     image_filename = os.path.basename(self.image.name).lower().replace('_','')
-    #     hashcode = uuid.uuid4()
-    #     self.project_id = f"{dataset__name[:5]}_{image_filename}_{hashcode}"
-    #     super(Image, self).save(*args, **kwargs)
-
-
-
-
-
 class ImageMetaData(models.Model):
     """Class for the meta data"""
     image = models.OneToOneField(Image,

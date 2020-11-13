@@ -9,7 +9,7 @@ import uuid
 
 class DataSet(models.Model):
     """Class for datasets"""
-    name = models.CharField(unique=True, max_length = 10000)
+    name = models.CharField(unique=True, max_length = 1000)
     image_formats = (models.CharField(max_length = 1000, default=""))
 
     def __str__(self):
@@ -20,14 +20,15 @@ class Image(models.Model):
     """Class for images"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
     image = models.ImageField()
+    project_id = models.CharField(max_length = 100)
 
 
-    def save(self, *args, **kwargs):
-        dataset_name = self.dataset.name.tolower().replace('_','')
-        image_filename = os.path.basename(self.image.name).tolower().replace('_','')
-        hashcode = uuid.uuid4()
-        self.project_id = f"{self.name'_'self.image_formats'}
-        super(Image, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     dataset_name = self.dataset.name.lower().replace('_','')
+    #     image_filename = os.path.basename(self.image.name).lower().replace('_','')
+    #     hashcode = uuid.uuid4()
+    #     self.project_id = f"{dataset__name[:5]}_{image_filename}_{hashcode}"
+    #     super(Image, self).save(*args, **kwargs)
 
 
 

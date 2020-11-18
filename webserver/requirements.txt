@@ -8,4 +8,3 @@ pytest-django
 pytest-bdd
 pytest-xdist
 djangorestframework
-

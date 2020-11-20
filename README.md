@@ -12,7 +12,7 @@ Once inside the running container, type the commands bellow to create the databa
 
 ``` cd dorothy-image-service\webserver\django ```
      ```docker-compose up -d```
-``` docker-compose exec web python manage.py migrate```
+``` docker-compose exec web python webserver/django/manage.py migrate```
 
 ## Setting Up The Aplication
 Assuming that you have already the datasets downloaded in your computer, follow the steps to load the data and them be able the access it in the API.

@@ -21,7 +21,6 @@ RUN chown -R www-data:www-data /imagesrep
 COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
-RUN rm requirements.txt
 
 #Copying necessary files for production execution.
 COPY django ./

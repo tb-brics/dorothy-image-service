@@ -51,12 +51,13 @@ class Command(BaseCommand):
             image_file = Image(
                 dataset=dataset,
                 image=image_correct_path,
-                project_id=project_id
             )
             image_file.save()
 
             image_meta_data = ImageMetaData(
                 image=image_file,
+                gender=metadata_data[index].gender,
+                age=metadata_data[index].age,
                 has_tb=metadata_data[index].check_normality,
                 original_report=metadata_data[index].report
             )

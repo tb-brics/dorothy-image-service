@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DataSet, Image, ImageMetaData
+from .models import DataSet, Image, ImageMetaData, Report
 
 class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,7 +11,7 @@ class ImageMetaDataSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name", read_only=True)
     class Meta:
         model = ImageMetaData
-        fields = ['dataset_name', 'has_tb', 'original_report']
+        fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam']
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -20,4 +20,10 @@ class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Image
-        fields = ['dataset_name', 'image',  'project_id', 'metadata']
+        fields = ['dataset_name', 'image','project_id' ,'insertion_date', 'metadata']
+
+class ReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['image', 'report_insertion_date', 'report', 'form_version', 'image_quality',
+                'image_quality', 'reason_low_quality', 'doctor_id' ]

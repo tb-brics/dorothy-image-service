@@ -46,6 +46,7 @@ class ImageMetaData(models.Model):
     gender = models.CharField(max_length=50, null=True)
     age = models.IntegerField(null=True)
     date_exam = models.DateField(auto_now_add=False ,auto_now=False, blank=True, null=True)
+    
 
 class Report(models.Model):
     """Class for the reports"""

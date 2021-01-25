@@ -1,8 +1,11 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from rest_framework import viewsets
 from .models import DataSet, Image, ImageMetaData, Report
 from .serializers import DataSetSerializer, ImageSerializer, ImageMetaDataSerializer, ReportSerializer
 from rest_framework.filters import SearchFilter, OrderingFilter
+
+
 
 class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = DataSet.objects.all()
@@ -12,7 +15,7 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = (['dataset__name'])
+    search_fields = (['dataset__name','project_id'])
 
 
 class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):
@@ -22,3 +25,6 @@ class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):
 class ReportViewSet(viewsets.ModelViewSet):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
+
+
+

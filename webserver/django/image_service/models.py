@@ -2,19 +2,22 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
+import datetime
 import os
 import uuid
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
-import os
-
 
 
 class DataSet(models.Model):
     """Class for datasets"""
     name = models.CharField(unique=True, max_length = 100)
     image_formats = models.CharField(max_length = 50, default="")
+    @property
+    def number_images (self):
+        return Image.objects.filter(dataset=self.id).count()
+    
 
     def __str__(self):
         return str(self.name)
@@ -26,6 +29,9 @@ class Image(models.Model):
     image = models.ImageField()
     insertion_date = models.DateField(auto_now_add=True ,auto_now=False)
     project_id = models.CharField(max_length = 10000, default="")
+    date_acquisition = models.DateField(auto_now_add=True, auto_now=False, blank=True, null=True)
+
+
 
     def save(self, *args, **kwargs):
         dataset_name = str(self.dataset).lower().replace('_','')

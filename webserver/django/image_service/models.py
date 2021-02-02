@@ -17,7 +17,7 @@ class DataSet(models.Model):
     @property
     def number_images (self):
         return Image.objects.filter(dataset=self.id).count()
-    
+
 
     def __str__(self):
         return str(self.name)
@@ -36,8 +36,7 @@ class Image(models.Model):
     def save(self, *args, **kwargs):
         dataset_name = str(self.dataset).lower().replace('_','')
         image_filename = str(os.path.splitext(os.path.basename(str(self.image)))[0])
-        hashcode = str(uuid.uuid4())
-        self.project_id = f"{dataset_name[:5]}_{image_filename}_{hashcode[:5]}"
+        self.project_id = f"{dataset_name[:5]}_{image_filename}"
         super(Image, self).save(*args, **kwargs)
 
 
@@ -52,7 +51,7 @@ class ImageMetaData(models.Model):
     gender = models.CharField(max_length=50, null=True)
     age = models.IntegerField(null=True)
     date_exam = models.DateField(auto_now_add=False ,auto_now=False, blank=True, null=True)
-    
+
 
 class Report(models.Model):
     """Class for the reports"""

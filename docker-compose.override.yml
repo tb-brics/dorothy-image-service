@@ -12,6 +12,7 @@
         web:
             #Using DJango web server for easy debugging
             command: python ./webserver/django/manage.py runserver 0.0.0.0:80
+            build: ./webserver
             volumes:
                 #This will map your dev environment into the container so you
                 #won't need to rebuild the container at each code change. It will map

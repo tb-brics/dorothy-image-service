@@ -129,3 +129,35 @@ STATIC_ROOT = '/var/www/dorothy/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/imagesrep/'
+
+LOG_LEVEL_SETUP = 'INFO'
+LOG_FORMAT_SETUP = 'verbose'
+if DEBUG:
+    LOG_LEVEL_SETUP = 'DEBUG'
+    LOG_FORMAT_SETUP = 'simple'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': LOG_LEVEL_SETUP,
+            'class': 'logging.StreamHandler',
+            'formatter': LOG_FORMAT_SETUP,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': LOG_LEVEL_SETUP,
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+}

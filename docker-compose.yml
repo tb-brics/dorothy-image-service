@@ -10,8 +10,11 @@ services:
     volumes:
         - PostgresDB:/var/lib/postgresql/data
   web:
-    build: ./webserver
+    image: luccascarpa/dorothy-image-service-web
     command: ./run_server.sh
+    ports:
+      - "80:80"
+      - "443:443"
     volumes:
       - ImagesRep:/imagesrep
     depends_on:
@@ -20,4 +23,3 @@ services:
 volumes:
     PostgresDB:
     ImagesRep:
-    

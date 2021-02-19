@@ -8,13 +8,22 @@ X-ray Image web service for managing x-ray databases,exporting the TB tagged ima
 The image service builds the data base  that will be filled with the data from multiple datasets, and them rearrange and display them to users in a more accessible way.
 
 ## Running the Web Service
-Once inside the running container, type the commands bellow to create the database structure and create a Django superuser to have access to the admin page. After cloning this repository, via command line, cd into the project root folder and start the containers by running:
+In your terminal, type the commands bellow to create the database structure. After cloning this repository, via command line, cd into the project root folder and start the containers by running:
 
-``` cd dorothy-image-service\webserver\django ```
+``` cd dorothy-image-servic/webserver/django ```
      ```docker-compose up -d```
-``` docker-compose exec web python webserver/django/manage.py migrate```
+
+After doing that, you must acces the container to install an important requirement, the dorothy-data-reader repository. So you must type the following commands:
+
+```docker exec -it dorothy-image-service_web_1 bash```
+```pip install git+https://github.com/tb-brics/dorothy-data-reader.git```
+
+And finally, to create your data base models:
+```cd webserver/django```
+```python manage.py migrate```
 
 ## Setting Up The Aplication
+Now, exit the container, going back to the regular terminal, still on the dorothy-image-service/webserver/django folder.
 Assuming that you have already the datasets downloaded in your computer, follow the steps to load the data and them be able the access it in the API.
 
 1. Copying the datasets to the container:

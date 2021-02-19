@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DataSet, Image, ImageMetaData, Report
+from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
 class DataSetSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -50,16 +50,23 @@ class ReportSerializer(serializers.ModelSerializer):
         project_id = image_field.get('project_id')
         image = Image.objects.get(project_id= project_id)
         instance.image = image
-        instance.report_insertion_date = validate_data.get("report_insertion_date")
-        instance.report = validate_data.get("report")
-        instance.form_version = validate_data.get("form_version")
+        instance.performed_byform = validate_data.get("performed_by")
+        instance.date_added = validate_data.get("date_added")
         instance.image_quality = validate_data.get("image_quality")
         instance.reason_low_quality = validate_data.get("reason_low_quality")
-        instance.doctor_id = validate_data.get("doctor_id")
+        instance.report_version = validate_data.get("report_version")
+        instance.report_content = validate_data.get("report_content")
         print(instance)
         return instance
 
     class Meta:
         model = Report
-        fields = ['project_id', 'report_insertion_date', 'report', 'form_version', 'image_quality',
-                'reason_low_quality', 'doctor_id' ]
+        fields = ['project_id', 'performed_by', 'date_added', 'image_quality',
+                'reason_low_quality', 'report_version', 'report_content' ]
+
+
+class ImageSamplingSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ImageSampling
+        fields = [ 'image', 'insertion_date']

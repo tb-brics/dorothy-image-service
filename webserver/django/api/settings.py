@@ -122,15 +122,22 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
+# https://docs.djangoproject.com/en/3.0/howto/static-files/
 
+#This value must match the value for STATIC LOCATION in NGinx config file
 STATIC_URL = '/static/'
-STATIC_ROOT = '/var/www/dorothy/static/'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/imagesrep/'
+#This value must match the value for STATIC ALIAS in NGinx config file
+STATIC_ROOT =  '/var/www/dorothy/static/'
+
+#Defining the base dir where the x-ray images will stay.
+#This value must match the value for MEDIA ALIAS in NGinx config file
+MEDIA_ROOT='/imagesrep/'
+
+#Base URL to serve the x-ray images.
+#This value must match the value for MEDIA LOCATION in NGinx config file
+MEDIA_URL='/media/'
 
 LOG_LEVEL_SETUP = 'INFO'
 LOG_FORMAT_SETUP = 'verbose'

@@ -2,21 +2,7 @@
 
 server {
     listen 80;
-    server_name dorothy;
-    location / {
-        return 301 https://$host$request_uri;
-    }
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-}
-
-server {
-    listen 443 ssl;
-    server_name dorothy;
-
-    ssl_certificate /etc/nginx/certs/nginx-selfsigned.crt;
-    ssl_certificate_key /etc/nginx/certs/nginx-selfsigned.key;
+    #server_name dorothy;
 
     # Disable any limits to avoid HTTP 413 for large image uploads
     client_max_body_size 0;

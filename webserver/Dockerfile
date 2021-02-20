@@ -1,7 +1,7 @@
 FROM rctorres/dorothy:0.5
 
 #This will force log messages to not be buffered.
-ENV PYTHONUNBUFFERED 1
+#ENV PYTHONUNBUFFERED 1
 
 #Currently, the production version (LPS) is mapping /imagesrep to ~torres/Imagens_Temp.
 #As a result, /imagesrep within the container is owned to user/group rtorres:rtorres (1419/513)

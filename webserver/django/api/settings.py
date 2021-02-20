@@ -25,9 +25,10 @@ SECRET_KEY = 'gpr+ts9e5bp2ith=o9&4e6d4hj8(t)l-4mlzt@!c6hei5!o882'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'false') == 'true'
+ALLOW_LOCALHOST = os.environ.get('ALLOW_LOCALHOST', 'false') == 'true'
 
 ALLOWED_HOSTS = ['dorothy', 'dorothy-qa.azurewebsites.net', 'dorothy.lps.ufrj.br']
-if DEBUG:
+if DEBUG or ALLOW_LOCALHOST:
     ALLOWED_HOSTS.append('localhost')
     ALLOWED_HOSTS.append('host.docker.internal')
 

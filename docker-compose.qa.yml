@@ -6,3 +6,5 @@
                 - "8000:80"
             environment:
                 PRODUCTION: 'true'
+                ALLOW_LOCALHOST: 'true'
+

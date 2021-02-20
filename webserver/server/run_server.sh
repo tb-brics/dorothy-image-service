@@ -1,4 +1,3 @@
-  
 #!/usr/bin/env bash
 
 echo "Starting GUnicorn for handling dynamic content."

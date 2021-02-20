@@ -24,9 +24,11 @@ BASE_DIR = Path(__file__).resolve()
 SECRET_KEY = 'gpr+ts9e5bp2ith=o9&4e6d4hj8(t)l-4mlzt@!c6hei5!o882'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'false') == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['dorothy', 'dorothy-qa.azurewebsites.net', 'dorothy.lps.ufrj.br']
+if DEBUG:
+    ALLOWED_HOSTS.append('localhost')
 
 
 # Application definition

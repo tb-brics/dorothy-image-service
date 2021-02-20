@@ -29,6 +29,7 @@ DEBUG = os.environ.get('DEBUG', 'false') == 'true'
 ALLOWED_HOSTS = ['dorothy', 'dorothy-qa.azurewebsites.net', 'dorothy.lps.ufrj.br']
 if DEBUG:
     ALLOWED_HOSTS.append('localhost')
+    ALLOWED_HOSTS.append('host.docker.internal')
 
 
 # Application definition

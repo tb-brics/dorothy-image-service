@@ -1,10 +1,7 @@
-FROM python:3.7
+FROM rctorres/dorothy:0.5
 
 #This will force log messages to not be buffered.
 ENV PYTHONUNBUFFERED 1
-
-#Installing SO-level dependencies
-RUN apt-get update && apt-get install nginx gettext vim -y --no-install-recommends
 
 #Configuring NGINX for handling static contents.
 COPY server/nginx.default /etc/nginx/sites-available/default

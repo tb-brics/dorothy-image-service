@@ -10,7 +10,7 @@ services:
     volumes:
         - PostgresDB:/var/lib/postgresql/data
   web:
-    image: rctorres/dorothy-image-service-web
+    image: luccascarpa/dorothy-image-service-web
     command: ./run_server.sh
     volumes:
       - ImagesRep:/imagesrep

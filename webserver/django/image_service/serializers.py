@@ -1,12 +1,11 @@
 from rest_framework import serializers
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
+import json
 class DataSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DataSet
         fields = ['name', 'image_formats', 'number_images']
-
-
 
 
 class ImageMetaDataSerializer(serializers.ModelSerializer):
@@ -31,42 +30,44 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 class ReportSerializer(serializers.ModelSerializer):
-    project_id = serializers.CharField(source="image.project_id")
+    image = serializers.CharField(source = 'image.project_id')
+    performed_by = serializers.CharField()
 
     def validate(self, data):
         image = data.get('image')
-        project_id = image.get('project_id')
-        print(project_id)
-        print(image)
         try:
-            image = Image.objects.get(project_id=project_id)
+            image = Image.objects.get(project_id=image)
         except Image.DoesNotExist:
-            raise serializers.ValidationError({"project_id":"image does not exist"})
+            raise serializers.ValidationError({"image":"image does not exist"})
         return data
 
     def create(self, validate_data):
         instance = Report()
         image_field = validate_data.get('image')
-        project_id = image_field.get('project_id')
-        image = Image.objects.get(project_id= project_id)
+        image = Image.objects.get(project_id=image_field)
+
         instance.image = image
-        instance.performed_byform = validate_data.get("performed_by")
+        instance.performed_by = validate_data.get("performed_by")
         instance.date_added = validate_data.get("date_added")
         instance.image_quality = validate_data.get("image_quality")
         instance.reason_low_quality = validate_data.get("reason_low_quality")
         instance.report_version = validate_data.get("report_version")
-        instance.report_content = validate_data.get("report_content")
-        print(instance)
+        instance.report_content = json.loads(validate_data.get("report_content"))
+
+        instance.save()
+
         return instance
 
     class Meta:
         model = Report
-        fields = ['project_id', 'performed_by', 'date_added', 'image_quality',
-                'reason_low_quality', 'report_version', 'report_content' ]
+        fields = ['image', 'performed_by', 'date_added', 'image_quality',
+                'reason_low_quality', 'report_version', 'report_content']
 
 
 class ImageSamplingSerializer(serializers.ModelSerializer):
+    project_id = serializers.CharField(source='image.project_id', read_only=True)
+    image = serializers.ImageField(source='image.image')
 
     class Meta:
         model = ImageSampling
-        fields = [ 'image', 'insertion_date']
+        fields = ['image', 'project_id', 'insertion_date']

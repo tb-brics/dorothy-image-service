@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 import datetime
 import os
-import uuid
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
@@ -31,7 +30,8 @@ class Image(models.Model):
     project_id = models.CharField(max_length = 10000, default="")
     date_acquisition = models.DateField(auto_now_add=True, auto_now=False, blank=True, null=True)
 
-
+    def __str__(self):
+        return self.project_id
 
     def save(self, *args, **kwargs):
         dataset_name = str(self.dataset).lower().replace('_','')
@@ -83,5 +83,5 @@ class Report(models.Model):
 
 class ImageSampling(models.Model):
     """class for the image sampling"""
-    image = models.ImageField(unique = True)
+    image = models.ForeignKey(Image, on_delete=models.CASCADE)
     insertion_date = models.DateField(auto_now_add=False, auto_now=False)

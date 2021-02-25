@@ -71,7 +71,7 @@ class Report(models.Model):
     image = models.ForeignKey(Image, on_delete=models.PROTECT, verbose_name=_('X-Ray image'))
 
     #Radiologist information
-    performed_by = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name=_('Radiologist ID'))
+    performed_by = models.CharField(max_length = 100, null=False, blank=False,verbose_name=_('Radiologist ID'))
     date_added = models.DateTimeField(auto_now_add=False, verbose_name=_('Date of CXR evaluation'))
 
     image_quality = models.CharField(choices=YES_NO_CHOICES, max_length=1, verbose_name=_('CXR with minimal criteria for interpretation?'))

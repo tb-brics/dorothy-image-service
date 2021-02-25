@@ -25,7 +25,7 @@ class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ImageMetaDataSerializer
 
 
-class ReportViewSet(viewsets.ReadOnlyModelViewSet):
+class ReportViewSet(viewsets.ModelViewSet):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
 

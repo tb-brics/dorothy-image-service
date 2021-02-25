@@ -30,8 +30,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
 
 class ReportSerializer(serializers.ModelSerializer):
-    image = serializers.CharField(source = 'image.project_id')
-    performed_by = serializers.CharField()
+    image = serializers.CharField()
 
     def validate(self, data):
         image = data.get('image')

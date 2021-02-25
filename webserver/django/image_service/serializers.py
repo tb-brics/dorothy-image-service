@@ -1,6 +1,10 @@
+import logging
 from rest_framework import serializers
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
 import json
+
+log = logging.getLogger(__name__)
+
 class DataSetSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -33,21 +37,28 @@ class ReportSerializer(serializers.ModelSerializer):
     image = serializers.CharField()
 
     def validate(self, data):
+        log.info('Starting report form validation.')
+
         image = data.get('image')
         report_content = data.get('report_content')
 
         try:
             image = Image.objects.get(project_id=image)
-        except Image.DoesNotExist:
+        except Image.DoesNotExist as e:
+            log.error('Image ID (%s) received from report service does not exists! %s', image, e)
             raise serializers.ValidationError({"image":"image does not exist"})
 
         try:
             json.loads(report_content)
-        except TypeError:
+        except TypeError as e:
+            log.error('Report JSON format is not correct! Form validation failed! %s', e)
             raise serializers.ValidationError({"report_content":"the JSON object must be str, bytes or bytearray"})
+        
+        log.info('Report content successfully validated.')
         return data
 
     def create(self, validate_data):
+        log.info('Creating report DB instance.')
         instance = Report()
         image_field = validate_data.get('image')
         image = Image.objects.get(project_id=image_field)
@@ -61,6 +72,7 @@ class ReportSerializer(serializers.ModelSerializer):
         instance.report_content = json.loads(validate_data.get("report_content"))
 
         instance.save()
+        log.info('Report content successfully saved to DB.')
 
         return instance
 

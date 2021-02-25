@@ -34,10 +34,17 @@ class ReportSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         image = data.get('image')
+        report_content = data.get('report_content')
+
         try:
             image = Image.objects.get(project_id=image)
         except Image.DoesNotExist:
             raise serializers.ValidationError({"image":"image does not exist"})
+
+        try:
+            json.loads(report_content)
+        except TypeError:
+            raise serializers.ValidationError({"report_content":"the JSON object must be str, bytes or bytearray"})
         return data
 
     def create(self, validate_data):

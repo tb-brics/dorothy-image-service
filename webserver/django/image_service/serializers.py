@@ -54,7 +54,7 @@ class ReportSerializer(serializers.ModelSerializer):
             log.error('Report JSON format is not correct! Form validation failed! %s', e)
             raise serializers.ValidationError({"report_content":"the JSON object must be str, bytes or bytearray"})
         
-        log.info('Report content successfully validated.')
+        log.info('Report content for image %s successfully validated.', image)
         return data
 
     def create(self, validate_data):
@@ -72,7 +72,7 @@ class ReportSerializer(serializers.ModelSerializer):
         instance.report_content = json.loads(validate_data.get("report_content"))
 
         instance.save()
-        log.info('Report content successfully saved to DB.')
+        log.info('Report content for image %s successfully saved to DB.', image_field)
 
         return instance
 

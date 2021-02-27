@@ -37,10 +37,10 @@ class Image(models.Model):
     def save(self, *args, **kwargs):
         dataset_name = str(self.dataset).lower().replace('_','')
         image_filename = str(os.path.splitext(os.path.basename(str(self.image)))[0])
-        project_id = f"{dataset_name[:5]}_{image_filename}"
         hash = hashlib.sha256()
-        hash.update(project_id.encode())
-        self.project_id = hash.hexdigest()
+        hash.update(self.image.read())
+        image_hash = hash.hexdigest().upper()
+        self.project_id = f"{dataset_name[:5]}_{image_filename}_{image_hash[:6]}"
         super(Image, self).save(*args, **kwargs)
 
 

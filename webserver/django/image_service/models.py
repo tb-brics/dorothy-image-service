@@ -1,4 +1,5 @@
 """Importing models module to create models classes"""
+import hashlib
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -36,7 +37,10 @@ class Image(models.Model):
     def save(self, *args, **kwargs):
         dataset_name = str(self.dataset).lower().replace('_','')
         image_filename = str(os.path.splitext(os.path.basename(str(self.image)))[0])
-        self.project_id = f"{dataset_name[:5]}_{image_filename}"
+        project_id = f"{dataset_name[:5]}_{image_filename}"
+        hash = hashlib.sha256()
+        hash.update(project_id.encode())
+        self.project_id = hash.hexdigest()
         super(Image, self).save(*args, **kwargs)
 
 

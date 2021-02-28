@@ -46,13 +46,16 @@ class Image(models.Model):
 
 class ImageMetaData(models.Model):
     """Class for the meta data"""
+
+    GENDER_CHOICES = [('M', _('Male')), ('F', _('Female'))]
+
     image = models.OneToOneField(Image,
                                  related_name='metadata',
                                  primary_key=True,
                                  on_delete=models.CASCADE)
     has_tb = models.BooleanField()
     original_report = models.TextField(null=True)
-    gender = models.CharField(max_length=50, null=True)
+    gender = models.CharField(max_length=50, null=True, choices= GENDER_CHOICES)
     age = models.IntegerField(null=True)
     date_exam = models.DateField(auto_now_add=False ,auto_now=False, blank=True, null=True)
 

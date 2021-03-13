@@ -10,7 +10,7 @@ services:
     volumes:
         - PostgresDB:/var/lib/postgresql/data
   web:
-    image: rctorres/dorothy-image-service-web
+    image: rctorres/dorothy-image-service-web:${DEPLOY_ENVIRONMENT:-latest}
     command: ./run_server.sh
     volumes:
       - ImagesRep:/imagesrep

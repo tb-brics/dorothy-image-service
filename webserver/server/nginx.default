@@ -23,7 +23,6 @@ server {
     #location must be the same as settings.MEDIA_URL
     #alias must be the same as settings.MEDIA_ROOT.
     location /media/ {
-        internal;
         alias /imagesrep/;
     }
 

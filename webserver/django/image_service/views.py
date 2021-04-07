@@ -1,10 +1,20 @@
-from django.shortcuts import render
-from django.http import JsonResponse
+from PIL import Image as pil_image
+
+from  django.http import HttpResponse
 from rest_framework import viewsets
+from rest_framework import generics
+
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
-from .serializers import DataSetSerializer, ImageSerializer, ImageMetaDataSerializer, ReportSerializer, ImageSamplingSerializer
+from .serializers import (DataSetSerializer,
+                          ImageSerializer,
+                          ImageMetaDataSerializer,
+                          ReportSerializer,
+                          ImageSamplingSerializer,
+                          ImageFileSerializer)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
+from rest_framework.decorators import renderer_classes
+
 
 
 
@@ -33,3 +43,18 @@ class ReportViewSet(viewsets.ModelViewSet):
 class ImageSamplingViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ImageSampling.objects.all()
     serializer_class = ImageSamplingSerializer
+
+
+class ImageFileView(generics.RetrieveAPIView):
+    serializer_class = ImageFileSerializer
+    lookup_field = 'project_id'
+    queryset = Image.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        image_path = instance.image.path
+        try:
+            with open(image_path, 'rb') as img:
+                return HttpResponse(img.read(), content_type='image/png')
+        except Exception as exc:
+            return Response({'error': f'Could not read the file. ({exc})'})

@@ -25,13 +25,12 @@ class ImageSerializer(serializers.ModelSerializer):
     metadata = ImageMetaDataSerializer(required=True)
     number_reports = serializers.IntegerField(default=0)
 
+    def count_reports(self, obj):
+        return obj.number_reports.count()
+
     class Meta:
         model = Image
         fields = ['dataset_name', 'image','project_id' ,'insertion_date', 'metadata', 'date_acquisition', 'number_reports']
-
-    def count_reports(self,obj):
-        return obj.number_reports.count()
-
 
 class ReportSerializer(serializers.ModelSerializer):
     image = serializers.CharField()
@@ -89,3 +88,9 @@ class ImageSamplingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageSampling
         fields = ['image', 'project_id', 'insertion_date']
+
+
+class ImageFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ('image',)

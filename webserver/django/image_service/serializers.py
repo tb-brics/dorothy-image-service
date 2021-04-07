@@ -1,12 +1,14 @@
 import logging
+from django.urls import reverse
 from rest_framework import serializers
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
+
 import json
+
 
 log = logging.getLogger(__name__)
 
 class DataSetSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = DataSet
         fields = ['name', 'image_formats', 'number_images']
@@ -24,13 +26,25 @@ class ImageSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name", read_only=True)
     metadata = ImageMetaDataSerializer(required=True)
     number_reports = serializers.IntegerField(default=0)
+    image_url = serializers.SerializerMethodField('get_image_url')
 
     def count_reports(self, obj):
         return obj.number_reports.count()
 
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        url = reverse('image_file', kwargs={'project_id': obj.project_id})
+        return request.build_absolute_uri(url) 
+
     class Meta:
         model = Image
-        fields = ['dataset_name', 'image','project_id' ,'insertion_date', 'metadata', 'date_acquisition', 'number_reports']
+        fields = ['dataset_name',
+                  'image_url',
+                  'project_id',
+                  'insertion_date',
+                  'metadata',
+                  'date_acquisition',
+                  'number_reports']
 
 class ReportSerializer(serializers.ModelSerializer):
     image = serializers.CharField()

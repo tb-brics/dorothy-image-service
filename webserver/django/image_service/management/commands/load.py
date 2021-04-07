@@ -42,11 +42,6 @@ class Command(BaseCommand):
             for parts in range(len(essential_parts_of_it)):
                 image_correct_path = os.path.join(image_correct_path, essential_parts_of_it[parts])
 
-            #Building the images ids:
-            dataset_name = dataset.name.lower().replace('_','')
-            image_filename = image_data[index].imagename
-            hashcode = uuid.uuid4()
-            project_id = f"{dataset_xrd.name[:5]}_{image_filename}_{hashcode}"
 
             image_file = Image(
                 dataset=dataset,

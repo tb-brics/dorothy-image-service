@@ -1,19 +1,32 @@
-from django.shortcuts import render
-from django.http import JsonResponse
+from PIL import Image as pil_image
+
+from  django.http import HttpResponse
 from rest_framework import viewsets
+from rest_framework import generics
+
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
-from .serializers import DataSetSerializer, ImageSerializer, ImageMetaDataSerializer, ReportSerializer, ImageSamplingSerializer
+from .serializers import (DataSetSerializer,
+                          ImageSerializer,
+                          ImageMetaDataSerializer,
+                          ReportSerializer,
+                          ImageSamplingSerializer,
+                          ImageFileSerializer)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
+from rest_framework.decorators import renderer_classes
+from rest_framework.permissions import IsAuthenticated
+
 
 
 
 class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = DataSet.objects.all()
     serializer_class = DataSetSerializer
 
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     filter_backends = (SearchFilter, OrderingFilter)
@@ -21,15 +34,34 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = ImageMetaData.objects.all()
     serializer_class = ImageMetaDataSerializer
 
 
 class ReportViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
 
 
 class ImageSamplingViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = ImageSampling.objects.all()
     serializer_class = ImageSamplingSerializer
+
+
+class ImageFileView(generics.RetrieveAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ImageFileSerializer
+    lookup_field = 'project_id'
+    queryset = Image.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        image_path = instance.image.path
+        try:
+            with open(image_path, 'rb') as img:
+                return HttpResponse(img.read(), content_type='image/png')
+        except Exception as exc:
+            return Response({'error': f'Could not read the file. ({exc})'})

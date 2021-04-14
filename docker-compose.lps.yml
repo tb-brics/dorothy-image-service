@@ -14,7 +14,7 @@ services:
       - "80:80"
     environment:
         PRODUCTION: 'true'
-    image: luccascarpa/dorothy-image-service-web:prod
+    image: tbbrics/dorothy-image-service-web:production
     command: ./run_server.sh
     volumes:
       - ImagesRep:/imagesrep

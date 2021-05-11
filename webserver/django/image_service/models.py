@@ -92,3 +92,4 @@ class ImageSampling(models.Model):
     """class for the image sampling"""
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
     insertion_date = models.DateField(auto_now_add=False, auto_now=False)
+    rank_position = models.IntegerField(null=True)

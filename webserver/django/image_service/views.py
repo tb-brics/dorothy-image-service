@@ -44,6 +44,8 @@ class ReportViewSet(viewsets.ModelViewSet):
 class ImageSamplingViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ImageSampling.objects.all()
     serializer_class = ImageSamplingSerializer
+    filter_backends = (SearchFilter, OrderingFilter)
+    ordering_fields = (['rank_position'])
 
 
 class ImageFileView(generics.RetrieveAPIView):

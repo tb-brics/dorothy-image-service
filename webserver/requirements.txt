@@ -4,4 +4,5 @@ pytest-django
 pytest-bdd
 pytest-xdist
 djangorestframework
+django_extensions
 -e git://github.com/tb-brics/dorothy-data-reader.git#egg=xrayreader

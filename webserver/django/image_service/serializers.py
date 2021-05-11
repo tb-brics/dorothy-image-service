@@ -34,7 +34,7 @@ class ImageSerializer(serializers.ModelSerializer):
     def get_image_url(self, obj):
         request = self.context.get('request')
         url = reverse('image_file', kwargs={'project_id': obj.project_id})
-        return request.build_absolute_uri(url) 
+        return request.build_absolute_uri(url)
 
     class Meta:
         model = Image
@@ -66,7 +66,7 @@ class ReportSerializer(serializers.ModelSerializer):
         except TypeError as e:
             log.error('Report JSON format is not correct! Form validation failed! %s', e)
             raise serializers.ValidationError({"report_content":"the JSON object must be str, bytes or bytearray"})
-        
+
         log.info('Report content for image %s successfully validated.', image)
         return data
 
@@ -101,7 +101,7 @@ class ImageSamplingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImageSampling
-        fields = ['image', 'project_id', 'insertion_date']
+        fields = ['image', 'project_id', 'insertion_date', 'rank_position']
 
 
 class ImageFileSerializer(serializers.ModelSerializer):

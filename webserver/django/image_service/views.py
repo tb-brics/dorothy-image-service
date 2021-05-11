@@ -20,13 +20,11 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = DataSet.objects.all()
     serializer_class = DataSetSerializer
 
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     filter_backends = (SearchFilter, OrderingFilter)
@@ -34,25 +32,21 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = ImageMetaData.objects.all()
     serializer_class = ImageMetaDataSerializer
 
 
 class ReportViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
 
 
 class ImageSamplingViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = ImageSampling.objects.all()
     serializer_class = ImageSamplingSerializer
 
 
 class ImageFileView(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated,)
     serializer_class = ImageFileSerializer
     lookup_field = 'project_id'
     queryset = Image.objects.all()

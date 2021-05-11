@@ -10,7 +10,11 @@ services:
     volumes:
         - PostgresDB:/var/lib/postgresql/data
   web:
-    image: tbbrics/dorothy-image-service-web:${DEPLOY_ENVIRONMENT:-latest}
+    ports:
+      - "80:80"
+    environment:
+        PRODUCTION: 'true'
+    image: tbbrics/dorothy-image-service-web:production
     command: ./run_server.sh
     volumes:
       - ImagesRep:/imagesrep

@@ -97,11 +97,16 @@ class ReportSerializer(serializers.ModelSerializer):
 
 class ImageSamplingSerializer(serializers.ModelSerializer):
     project_id = serializers.CharField(source='image.project_id', read_only=True)
-    image = serializers.ImageField(source='image.image')
+    image_url = serializers.SerializerMethodField('get_image_url')
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        url = reverse('image_file', kwargs={'project_id': obj.project_id})
+        return request.build_absolute_uri(url)
 
     class Meta:
         model = ImageSampling
-        fields = ['image', 'project_id', 'insertion_date', 'rank_position']
+        fields = ['image_url', 'project_id', 'insertion_date', 'rank_position']
 
 
 class ImageFileSerializer(serializers.ModelSerializer):

@@ -101,7 +101,7 @@ class ImageSamplingSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         request = self.context.get('request')
-        url = reverse('image_file', kwargs={'project_id': obj.project_id})
+        url = reverse('image_file', kwargs={'project_id': obj.image.project_id})
         return request.build_absolute_uri(url)
 
     class Meta:

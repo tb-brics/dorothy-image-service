@@ -79,8 +79,6 @@ class ReportSerializer(serializers.ModelSerializer):
         instance.image = image
         instance.performed_by = validate_data.get("performed_by")
         instance.date_added = validate_data.get("date_added")
-        instance.image_quality = validate_data.get("image_quality")
-        instance.reason_low_quality = validate_data.get("reason_low_quality")
         instance.report_version = validate_data.get("report_version")
         instance.report_content = json.loads(validate_data.get("report_content"))
 
@@ -91,8 +89,7 @@ class ReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Report
-        fields = ['image', 'performed_by', 'date_added', 'image_quality',
-                'reason_low_quality', 'report_version', 'report_content']
+        fields = ['image', 'performed_by', 'date_added', 'report_version', 'report_content']
 
 
 class ImageSamplingSerializer(serializers.ModelSerializer):

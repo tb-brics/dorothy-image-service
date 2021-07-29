@@ -4,13 +4,16 @@ from  django.http import HttpResponse
 from rest_framework import viewsets
 from rest_framework import generics
 
-from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
+from .models import DataSet, Image, ImageMetaData, Report, ImageSampling 
 from .serializers import (DataSetSerializer,
                           ImageSerializer,
                           ImageMetaDataSerializer,
                           ReportSerializer,
                           ImageSamplingSerializer,
-                          ImageFileSerializer)
+                          ImageFileSerializer,
+                          DataSetPostSerializer,
+                          ImagePostSerializer,
+                          ImageMetaDataPostSerializer)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 from rest_framework.decorators import renderer_classes
@@ -20,13 +23,13 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
     queryset = DataSet.objects.all()
     serializer_class = DataSetSerializer
 
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     filter_backends = (SearchFilter, OrderingFilter)
@@ -34,7 +37,7 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
     queryset = ImageMetaData.objects.all()
     serializer_class = ImageMetaDataSerializer
 
@@ -66,3 +69,21 @@ class ImageFileView(generics.RetrieveAPIView):
                 return HttpResponse(img.read(), content_type='image/png')
         except Exception as exc:
             return Response({'error': f'Could not read the file. ({exc})'})
+
+
+class DataSetPostViewSet(viewsets.ModelViewSet):
+    #permission_classes = (IsAuthenticated,)
+    queryset = DataSet.objects.all()
+    serializer_class = DataSetPostSerializer
+
+
+class ImagePostViewSet(viewsets.ModelViewSet):
+    #permission_classes = (IsAuthenticated,)
+    queryset = Image.objects.all()
+    serializer_class = ImagePostSerializer
+
+
+class ImageMetaDataPostViewSet(viewsets.ModelViewSet):
+    #permission_classes = (IsAuthenticated,)
+    queryset = ImageMetaData.objects.all()
+    serializer_class = ImageMetaDataPostSerializer

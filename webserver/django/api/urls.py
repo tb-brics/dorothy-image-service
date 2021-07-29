@@ -5,7 +5,10 @@ from image_service.views import (DataSetViewSet,
                                  ImageViewSet,
                                  ImageMetaDataViewSet,
                                  ReportViewSet,
-                                 ImageSamplingViewSet)
+                                 ImageSamplingViewSet,
+                                 DataSetPostViewSet,
+                                 ImagePostViewSet,
+                                 ImageMetaDataPostViewSet)
 from rest_framework import routers
 from django.conf import settings
 from django.conf.urls.static import static
@@ -19,6 +22,9 @@ router.register(r'images', ImageViewSet)
 router.register(r'images_meta_data', ImageMetaDataViewSet)
 router.register(r'report', ReportViewSet)
 router.register(r'imagesampling', ImageSamplingViewSet)
+router.register(r'post_dataset', DataSetPostViewSet)
+router.register(r'post_image', ImagePostViewSet)
+router.register(r'post_images_meta_data', ImageMetaDataPostViewSet)
 
 
 urlpatterns = [

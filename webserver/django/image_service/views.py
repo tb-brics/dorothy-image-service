@@ -1,8 +1,12 @@
 from PIL import Image as pil_image
+from django.db.models import query
+from django.db.models.query import QuerySet
 
 from  django.http import HttpResponse
-from rest_framework import viewsets
+from django.http.response import JsonResponse
+from rest_framework import serializers, viewsets
 from rest_framework import generics
+from rest_framework.views import APIView
 
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling 
 from .serializers import (DataSetSerializer,
@@ -13,23 +17,24 @@ from .serializers import (DataSetSerializer,
                           ImageFileSerializer,
                           DataSetPostSerializer,
                           ImagePostSerializer,
-                          ImageMetaDataPostSerializer)
+                          PostMetaDataSerializer,
+                          Post_Image_AND_MetaDataPostSerializer)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
-from rest_framework.decorators import renderer_classes
+from rest_framework.decorators import renderer_classes, api_view
 from rest_framework.permissions import IsAuthenticated
 
 
 
 
 class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     queryset = DataSet.objects.all()
     serializer_class = DataSetSerializer
 
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     filter_backends = (SearchFilter, OrderingFilter)
@@ -37,7 +42,7 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     queryset = ImageMetaData.objects.all()
     serializer_class = ImageMetaDataSerializer
 
@@ -71,19 +76,28 @@ class ImageFileView(generics.RetrieveAPIView):
             return Response({'error': f'Could not read the file. ({exc})'})
 
 
+
 class DataSetPostViewSet(viewsets.ModelViewSet):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated)
     queryset = DataSet.objects.all()
     serializer_class = DataSetPostSerializer
+    http_method_names = ['post']
 
 
 class ImagePostViewSet(viewsets.ModelViewSet):
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     queryset = Image.objects.all()
     serializer_class = ImagePostSerializer
+    http_method_names = ['post']
 
-
-class ImageMetaDataPostViewSet(viewsets.ModelViewSet):
-    #permission_classes = (IsAuthenticated,)
+class MetaDataPostViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = ImageMetaData.objects.all()
-    serializer_class = ImageMetaDataPostSerializer
+    serializer_class = PostMetaDataSerializer
+    http_method_names = ['post']
+
+class Post_Image_AND_MetaDataPostViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = ImageMetaData.objects.all()
+    serializer_class = Post_Image_AND_MetaDataPostSerializer
+    http_method_names = ['post']

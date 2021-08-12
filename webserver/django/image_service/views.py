@@ -26,7 +26,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
 class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated, IsAdminUser,)
+    permission_classes = (IsAuthenticated,)
     queryset = DataSet.objects.all()
     serializer_class = DataSetSerializer
 

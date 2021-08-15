@@ -1,4 +1,5 @@
 import logging
+from re import I
 from django.urls import reverse
 from rest_framework import serializers
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
@@ -110,3 +111,112 @@ class ImageFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = ('image',)
+
+
+class DataSetPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DataSet
+        fields = ['name', 'image_formats']
+
+
+class ImagePostSerializer(serializers.ModelSerializer):
+    dataset_name = serializers.CharField(source="dataset.name")
+
+
+    def validate(self, data):
+        log.info('Starting dataset validation.')
+        dataset_name = data.get("dataset").get("name")
+        try:
+            dataset = DataSet.objects.get(name=dataset_name)
+        except DataSet.DoesNotExist as e:
+            log.error('DataSet name (%s) received does not exists! %s', dataset_name, e)
+            raise serializers.ValidationError({"dataset":"dataset does not exist"})
+
+        log.info('DataSet successfully validated.', dataset_name)
+        return data
+
+    def create(self, validate_data):
+        log.info('Creating image DB instance.')
+        instance = Image()
+        dataset_name = validate_data.get("dataset").get("name")
+        dataset = DataSet.objects.get(name=dataset_name)
+
+        instance.dataset = dataset
+        instance.image = validate_data.get("image")
+
+        instance.save()
+        log.info('Image content for image %s successfully saved to DB.')
+
+        return instance
+
+    class Meta:
+        model = Image
+        fields = ['dataset_name', 'image']
+
+
+class PostMetaDataSerializer(serializers.ModelSerializer):
+    image = serializers.CharField()
+
+    def validate(self, data):
+        image = data.get('image')
+
+        try:
+            image = Image.objects.get(project_id=image)
+        except Image.DoesNotExist as e:
+            log.error('Image ID (%s) received from image service does not exists! %s', image, e)
+            raise serializers.ValidationError({"image":"image does not exist"})
+
+        return data
+
+    def create(self, validate_data):
+        log.info('Creating metadata DB instance.')
+        instance = ImageMetaData()
+
+        image_field = validate_data.get('image')
+        image = Image.objects.get(project_id=image_field)
+
+        instance.image = image
+        instance.has_tb = validate_data.get("has_tb")
+        instance.original_report = validate_data.get("original_report")
+        instance.gender = validate_data.get("gender")
+        instance.age = validate_data.get("age")
+        instance.date_exam = validate_data.get("date_exam")
+
+        instance.save()
+        log.info('successfully saved to DB.')
+
+        return instance
+
+    class Meta:
+        model = ImageMetaData
+        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']
+
+
+class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
+    image = ImagePostSerializer()
+
+    def create(self, validate_data):
+        log.info('Creating metadata DB instance.')
+        instance = ImageMetaData()
+
+        image_obj = Image()
+        dataset_name = validate_data.get('image').get('dataset').get('name')
+        image_obj.dataset = DataSet.objects.get(name=dataset_name)
+        image_obj.image = validate_data.get("image").get("image")
+        image_obj.save()
+
+        instance.image = image_obj
+        instance.has_tb = validate_data.get("has_tb")
+        instance.original_report = validate_data.get("original_report")
+        instance.gender = validate_data.get("gender")
+        instance.age = validate_data.get("age")
+        instance.date_exam = validate_data.get("date_exam")
+
+        instance.save()
+        log.info('successfully saved to DB.')
+
+        return instance
+
+    class Meta:
+        model = ImageMetaData
+        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']

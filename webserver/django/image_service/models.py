@@ -53,7 +53,7 @@ class ImageMetaData(models.Model):
                                  related_name='metadata',
                                  primary_key=True,
                                  on_delete=models.CASCADE)
-    has_tb = models.BooleanField()
+    has_tb = models.BooleanField(null=True)
     original_report = models.TextField(null=True)
     gender = models.CharField(max_length=50, null=True, choices= GENDER_CHOICES)
     age = models.IntegerField(null=True)

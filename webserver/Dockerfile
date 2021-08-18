@@ -1,4 +1,4 @@
-FROM tbbrics/dorothy:0.1
+FROM tbbrics/dorothy:0.2
 
 #This will force log messages to not be buffered.
 #ENV PYTHONUNBUFFERED 1

@@ -3,9 +3,11 @@ from django.db.models import query
 from django.db.models.query import QuerySet
 
 from  django.http import HttpResponse
+from django.http import response
 from django.http.response import JsonResponse
 from rest_framework import viewsets
 from rest_framework import generics
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling 
 from .serializers import (DataSetSerializer,
@@ -75,27 +77,38 @@ class ImageFileView(generics.RetrieveAPIView):
 
 
 
-class DataSetPostViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, IsAdminUser,)
+class DataSetPostViewSet(UserPassesTestMixin,viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = DataSet.objects.all()
     serializer_class = DataSetPostSerializer
     http_method_names = ['post']
 
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Uploaders']).count() > 0
 
-class ImagePostViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, IsAdminUser,)
+class ImagePostViewSet(UserPassesTestMixin,viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = Image.objects.all()
     serializer_class = ImagePostSerializer
     http_method_names = ['post']
 
-class MetaDataPostViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, IsAdminUser,)
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Uploaders']).count() > 0
+
+class MetaDataPostViewSet(UserPassesTestMixin,viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = ImageMetaData.objects.all()
     serializer_class = PostMetaDataSerializer
     http_method_names = ['post']
 
-class Post_Image_AND_MetaDataPostViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, IsAdminUser,)
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Uploaders']).count() > 0
+
+class Post_Image_AND_MetaDataPostViewSet(UserPassesTestMixin,viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = ImageMetaData.objects.all()
     serializer_class = Post_Image_AND_MetaDataPostSerializer
     http_method_names = ['post']
+
+    def test_func(self):
+        return self.request.user.groups.filter(name__in=['Uploaders']).count() > 0

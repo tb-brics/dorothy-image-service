@@ -8,7 +8,7 @@ import os
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
-
+from django.conf import settings
 
 class DataSet(models.Model):
     """Class for datasets"""
@@ -24,8 +24,8 @@ class DataSet(models.Model):
 
 
 def get_upload_path(instance,filename):
-        if not os.path.exists(instance.dataset.name):
-            os.mkdir(instance.dataset.name)
+        if not os.path.exists(os.path.join(settings.MEDIA_ROOT,instance.dataset.name)):
+            os.mkdir(os.path.join(settings.MEDIA_ROOT,instance.dataset.name))
         return os.path.join(instance.dataset.name,filename)
 
 class Image(models.Model):

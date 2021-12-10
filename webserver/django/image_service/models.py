@@ -23,10 +23,15 @@ class DataSet(models.Model):
         return str(self.name)
 
 
+def get_upload_path(instance,filename):
+        if not os.path.exists(instance.dataset.name):
+            os.mkdir(instance.dataset.name)
+        return os.path.join(instance.dataset.name,filename)
+
 class Image(models.Model):
     """Class for images"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
-    image = models.ImageField()
+    image = models.ImageField(upload_to=get_upload_path)
     insertion_date = models.DateField(auto_now_add=True ,auto_now=False)
     project_id = models.CharField(max_length = 10000, default="")
     date_acquisition = models.DateField(auto_now_add=True, auto_now=False, blank=True, null=True)

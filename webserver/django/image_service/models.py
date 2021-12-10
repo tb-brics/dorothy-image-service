@@ -26,7 +26,7 @@ class DataSet(models.Model):
 def get_upload_path(instance,filename):
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT,instance.dataset.name)):
             os.mkdir(os.path.join(settings.MEDIA_ROOT,instance.dataset.name))
-        return os.path.join(instance.dataset.name,filename)
+        return os.path.join(os.path.join(settings.MEDIA_ROOT,instance.dataset.name),filename)
 
 class Image(models.Model):
     """Class for images"""

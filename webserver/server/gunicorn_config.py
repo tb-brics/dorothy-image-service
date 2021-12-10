@@ -1,7 +1,5 @@
-import multiprocessing
-
 bind = "127.0.0.1:8080"
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = 4
 user = "www-data"
 group = "www-data"
 accesslog = "/var/log/dorothy/gunicorn-access.log"

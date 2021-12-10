@@ -59,16 +59,16 @@ class ReportSerializer(serializers.ModelSerializer):
         try:
             image = Image.objects.get(project_id=image)
         except Image.DoesNotExist as e:
-            log.error('Image ID (%s) received from report service does not exists! %s', image, e)
+            log.error(f'Image ID ({image}) received from report service does not exists! {e}')
             raise serializers.ValidationError({"image":"image does not exist"})
 
         try:
             json.loads(report_content)
         except TypeError as e:
-            log.error('Report JSON format is not correct! Form validation failed! %s', e)
+            log.error(f'Report JSON format is not correct! Form validation failed! {e}')
             raise serializers.ValidationError({"report_content":"the JSON object must be str, bytes or bytearray"})
 
-        log.info('Report content for image %s successfully validated.', image)
+        log.info(f'Report content for image {image} successfully validated.')
         return data
 
     def create(self, validate_data):
@@ -84,7 +84,7 @@ class ReportSerializer(serializers.ModelSerializer):
         instance.report_content = json.loads(validate_data.get("report_content"))
 
         instance.save()
-        log.info('Report content for image %s successfully saved to DB.', image_field)
+        log.info(f'Report content for image {image_field} successfully saved to DB.')
 
         return instance
 
@@ -129,10 +129,10 @@ class ImagePostSerializer(serializers.ModelSerializer):
         try:
             dataset = DataSet.objects.get(name=dataset_name)
         except DataSet.DoesNotExist as e:
-            log.error('DataSet name (%s) received does not exists! %s', dataset_name, e)
+            log.error(f'DataSet name ({dataset_name}) received does not exists! {e}')
             raise serializers.ValidationError({"dataset":"dataset does not exist"})
 
-        log.info('DataSet successfully validated.', dataset_name)
+        log.info(f'Data successfully validated: {dataset_name}')
         return data
 
     def create(self, validate_data):
@@ -145,7 +145,7 @@ class ImagePostSerializer(serializers.ModelSerializer):
         instance.image = validate_data.get("image")
 
         instance.save()
-        log.info('Image content for image %s successfully saved to DB.')
+        log.info('Image content successfully saved to DB.')
 
         return instance
 
@@ -163,7 +163,7 @@ class PostMetaDataSerializer(serializers.ModelSerializer):
         try:
             image = Image.objects.get(project_id=image)
         except Image.DoesNotExist as e:
-            log.error('Image ID (%s) received from image service does not exists! %s', image, e)
+            log.error(f'Image ID ({image}) received from image service does not exists! {e}')
             raise serializers.ValidationError({"image":"image does not exist"})
 
         return data

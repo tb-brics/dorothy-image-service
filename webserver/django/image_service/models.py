@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
+from sqlalchemy import true
 
 class DataSet(models.Model):
     """Class for datasets"""
@@ -63,7 +64,8 @@ class ImageMetaData(models.Model):
     gender = models.CharField(max_length=50, null=True, choices= GENDER_CHOICES)
     age = models.IntegerField(null=True)
     date_exam = models.DateField(auto_now_add=False ,auto_now=False, blank=True, null=True)
-
+    synthetic = models.BooleanField(default=False)
+    additional_information = JSONField(null=True)
 
 class Report(models.Model):
     """Class for the reports"""

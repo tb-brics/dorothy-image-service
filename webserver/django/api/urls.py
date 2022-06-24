@@ -9,7 +9,8 @@ from image_service.views import (DataSetViewSet,
                                  DataSetPostViewSet,
                                  ImagePostViewSet,
                                  MetaDataPostViewSet,
-                                 Post_Image_AND_MetaDataPostViewSet,)
+                                 Post_Image_AND_MetaDataPostViewSet,
+                                 FoldsViewSet)
 from rest_framework import routers
 from django.conf import settings
 from django.conf.urls.static import static
@@ -35,4 +36,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('api-token-auth/', obtain_auth_token, name = 'api_token_auth'),
+    path('folds/', FoldsViewSet.as_view()),
 ]

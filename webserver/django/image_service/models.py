@@ -2,14 +2,12 @@
 import hashlib
 from django.db import models
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField
 import datetime
 import os
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 from django.conf import settings
-from sqlalchemy import true
 
 class DataSet(models.Model):
     """Class for datasets"""
@@ -97,3 +95,14 @@ class ImageSampling(models.Model):
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
     insertion_date = models.DateField(auto_now_add=False, auto_now=False)
     rank_position = models.IntegerField(null=True)
+
+
+class Folds(models.Model):
+    folder = models.CharField(max_length=10)
+    fold = models.CharField(max_length=10)
+    partitions = JSONField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['folder', 'fold'], name='folder_fold')
+        ]

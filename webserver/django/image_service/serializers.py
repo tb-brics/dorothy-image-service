@@ -2,7 +2,7 @@ import logging
 from re import I
 from django.urls import reverse
 from rest_framework import serializers
-from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
+from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, Folds
 
 import json
 
@@ -220,3 +220,9 @@ class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageMetaData
         fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']
+
+
+class FoldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Folds
+        fields = '__all__'

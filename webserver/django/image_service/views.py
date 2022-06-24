@@ -1,16 +1,10 @@
-from PIL import Image as pil_image
-from django.db.models import query
-from django.db.models.query import QuerySet
-
 from  django.http import HttpResponse
-from django.http import response
-from django.http.response import JsonResponse
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework import generics
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.shortcuts import render, redirect
+from rest_framework.views import APIView
+from django.shortcuts import render
 
-from .models import DataSet, Image, ImageMetaData, Report, ImageSampling 
+from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, Folds
 from .serializers import (DataSetSerializer,
                           ImageSerializer,
                           ImageMetaDataSerializer,
@@ -20,7 +14,8 @@ from .serializers import (DataSetSerializer,
                           DataSetPostSerializer,
                           ImagePostSerializer,
                           PostMetaDataSerializer,
-                          Post_Image_AND_MetaDataPostSerializer)
+                          Post_Image_AND_MetaDataPostSerializer,
+                          FoldSerializer)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -117,3 +112,17 @@ class Post_Image_AND_MetaDataPostViewSet(viewsets.ModelViewSet):
     queryset = ImageMetaData.objects.all()
     serializer_class = Post_Image_AND_MetaDataPostSerializer
     http_method_names = ['post']
+
+
+class FoldsViewSet(APIView):
+    def get(self, request):
+        folds = Folds.objects.all()
+        serializer = FoldSerializer(folds, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = FoldSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

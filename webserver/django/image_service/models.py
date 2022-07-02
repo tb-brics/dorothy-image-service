@@ -100,17 +100,6 @@ class ImageSampling(models.Model):
     rank_position = models.IntegerField(null=True)
 
 
-class Folds(models.Model):
-    folder = models.CharField(max_length=10)
-    fold = models.CharField(max_length=10)
-    partitions = JSONField()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['folder', 'fold'], name='folder_fold')
-        ]
-
-
 class CrossValidationCluster(models.Model):
     cluster_id = models.CharField(max_length=20)
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)

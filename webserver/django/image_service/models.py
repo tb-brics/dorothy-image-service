@@ -2,45 +2,46 @@
 import hashlib
 from django.db import models
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField
 import datetime
 import os
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 from django.conf import settings
+
 
 class DataSet(models.Model):
     """Class for datasets"""
-    name = models.CharField(unique=True, max_length = 100)
-    image_formats = models.CharField(max_length = 50, default="")
-    @property
-    def number_images (self):
-        return Image.objects.filter(dataset=self.id).count()
+    name = models.CharField(unique=True, max_length=100)
+    image_formats = models.CharField(max_length=50, default="")
 
+    @property
+    def number_images(self):
+        return Image.objects.filter(dataset=self.id).count()
 
     def __str__(self):
         return str(self.name)
 
 
-def get_upload_path(instance,filename):
-        if not os.path.exists(os.path.join(settings.MEDIA_ROOT,instance.dataset.name)):
-            os.mkdir(os.path.join(settings.MEDIA_ROOT,instance.dataset.name))
-        return os.path.join(os.path.join(settings.MEDIA_ROOT,instance.dataset.name),filename)
+def get_upload_path(instance, filename):
+    if not os.path.exists(os.path.join(settings.MEDIA_ROOT, instance.dataset.name)):
+        os.mkdir(os.path.join(settings.MEDIA_ROOT, instance.dataset.name))
+    return os.path.join(os.path.join(settings.MEDIA_ROOT, instance.dataset.name), filename)
+
 
 class Image(models.Model):
     """Class for images"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
     image = models.ImageField(upload_to=get_upload_path)
-    insertion_date = models.DateField(auto_now_add=True ,auto_now=False)
-    project_id = models.CharField(max_length = 10000, default="")
+    insertion_date = models.DateField(auto_now_add=True, auto_now=False)
+    project_id = models.CharField(max_length=10000, default="")
     date_acquisition = models.DateField(auto_now_add=True, auto_now=False, blank=True, null=True)
 
     def __str__(self):
         return self.project_id
 
     def save(self, *args, **kwargs):
-        dataset_name = str(self.dataset).lower().replace('_','')
+        dataset_name = str(self.dataset).lower().replace('_', '')
         image_filename = str(os.path.splitext(os.path.basename(str(self.image)))[0])
         hash = hashlib.sha256()
         hash.update(self.image.read())
@@ -60,9 +61,11 @@ class ImageMetaData(models.Model):
                                  on_delete=models.CASCADE)
     has_tb = models.BooleanField(null=True)
     original_report = models.TextField(null=True)
-    gender = models.CharField(max_length=50, null=True, choices= GENDER_CHOICES)
+    gender = models.CharField(max_length=50, null=True, choices=GENDER_CHOICES)
     age = models.IntegerField(null=True)
-    date_exam = models.DateField(auto_now_add=False ,auto_now=False, blank=True, null=True)
+    date_exam = models.DateField(auto_now_add=False, auto_now=False, blank=True, null=True)
+    synthetic = models.BooleanField(default=False)
+    additional_information = JSONField(null=True)
 
 
 class Report(models.Model):
@@ -82,8 +85,8 @@ class Report(models.Model):
 
     image = models.ForeignKey(Image, on_delete=models.PROTECT, verbose_name=_('X-Ray image'))
 
-    #Radiologist information
-    performed_by = models.CharField(max_length = 100, null=False, blank=False,verbose_name=_('Radiologist ID'))
+    # Radiologist information
+    performed_by = models.CharField(max_length=100, null=False, blank=False, verbose_name=_('Radiologist ID'))
     date_added = models.DateTimeField(auto_now_add=False, verbose_name=_('Date of CXR evaluation'))
 
     report_version = models.PositiveSmallIntegerField(verbose_name=_('Report version'))
@@ -95,3 +98,45 @@ class ImageSampling(models.Model):
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
     insertion_date = models.DateField(auto_now_add=False, auto_now=False)
     rank_position = models.IntegerField(null=True)
+
+
+class CrossValidationCluster(models.Model):
+    cluster_id = models.CharField(max_length=20)
+    dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['cluster_id'], name='cross_validation_cluster_unique')
+        ]
+
+
+class CrossValidationFolder(models.Model):
+    folder_id = models.CharField(max_length=30)
+    cluster_id = models.ForeignKey(CrossValidationCluster, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['cluster_id', 'folder_id'], name='cross_validation_folder_unique')
+        ]
+
+
+class CrossValidationFold(models.Model):
+    fold_id = models.CharField(max_length=50)
+    folder_id = models.ForeignKey(CrossValidationFolder, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['fold_id'], name='cross_validation_fold_unique')
+        ]
+
+class CrossValidationFoldimages(models.Model):
+    fold_id = models.ForeignKey(CrossValidationFold, on_delete=models.CASCADE)
+    project_id = models.ForeignKey(Image, on_delete=models.CASCADE)
+    train = models.BooleanField(default=False)
+    test = models.BooleanField(default=False)
+    validation = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['project_id', 'fold_id'], name='cross_validation_fold_image_unique')
+        ]

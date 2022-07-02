@@ -1,13 +1,31 @@
+import http
 import logging
+from hashlib import sha1
+from time import time
 from re import I
 from django.urls import reverse
 from rest_framework import serializers
-from .models import DataSet, Image, ImageMetaData, Report, ImageSampling
+from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
+    CrossValidationFold, CrossValidationFolder, CrossValidationCluster, CrossValidationFoldimages
 
 import json
 
 
+def get_time_hash(length: int) -> str:
+    """
+    Generate a fixed-length hash based on current date & time.
+    Args:
+        length (int): hash length
+    Returns:
+        str
+    """
+    hash_object = sha1()
+    hash_object.update(str(time()).encode("utf-8"))
+    return hash_object.hexdigest()[:length]
+
+
 log = logging.getLogger(__name__)
+
 
 class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,7 +38,7 @@ class ImageMetaDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImageMetaData
-        fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam']
+        fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam', 'synthetic', 'additional_information']
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -47,6 +65,7 @@ class ImageSerializer(serializers.ModelSerializer):
                   'date_acquisition',
                   'number_reports']
 
+
 class ReportSerializer(serializers.ModelSerializer):
     image = serializers.CharField()
 
@@ -60,13 +79,13 @@ class ReportSerializer(serializers.ModelSerializer):
             image = Image.objects.get(project_id=image)
         except Image.DoesNotExist as e:
             log.error(f'Image ID ({image}) received from report service does not exists! {e}')
-            raise serializers.ValidationError({"image":"image does not exist"})
+            raise serializers.ValidationError({"image": "image does not exist"})
 
         try:
             json.loads(report_content)
         except TypeError as e:
             log.error(f'Report JSON format is not correct! Form validation failed! {e}')
-            raise serializers.ValidationError({"report_content":"the JSON object must be str, bytes or bytearray"})
+            raise serializers.ValidationError({"report_content": "the JSON object must be str, bytes or bytearray"})
 
         log.info(f'Report content for image {image} successfully validated.')
         return data
@@ -122,7 +141,6 @@ class DataSetPostSerializer(serializers.ModelSerializer):
 class ImagePostSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name")
 
-
     def validate(self, data):
         log.info('Starting dataset validation.')
         dataset_name = data.get("dataset").get("name")
@@ -130,7 +148,7 @@ class ImagePostSerializer(serializers.ModelSerializer):
             dataset = DataSet.objects.get(name=dataset_name)
         except DataSet.DoesNotExist as e:
             log.error(f'DataSet name ({dataset_name}) received does not exists! {e}')
-            raise serializers.ValidationError({"dataset":"dataset does not exist"})
+            raise serializers.ValidationError({"dataset": "dataset does not exist"})
 
         log.info(f'Data successfully validated: {dataset_name}')
         return data
@@ -164,7 +182,7 @@ class PostMetaDataSerializer(serializers.ModelSerializer):
             image = Image.objects.get(project_id=image)
         except Image.DoesNotExist as e:
             log.error(f'Image ID ({image}) received from image service does not exists! {e}')
-            raise serializers.ValidationError({"image":"image does not exist"})
+            raise serializers.ValidationError({"image": "image does not exist"})
 
         return data
 
@@ -220,3 +238,63 @@ class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageMetaData
         fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']
+
+
+class CrossValidationClusterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CrossValidationCluster
+        fields = '__all__'
+
+
+class CrossValidationFolderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CrossValidationFolder
+        fields = '__all__'
+
+    def create(self, validated_data):
+        instance = CrossValidationFolder()
+        cluster_id = validated_data.get("cluster_id")
+        instance.folder_id = cluster_id + "folder_" + get_time_hash(8)
+        instance.cluster_id = validated_data.get("cluster_id")
+        instance.save()
+        return instance
+
+
+class CrossValidationFoldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CrossValidationFold
+        fields = '__all__'
+
+    def validate(self, data):
+        if not data.get("folder_id"):
+            log.error("Missing required field 'folder_id'.")
+            raise serializers.ValidationError(
+                {"fold": "Missing required field 'folder_id'."},
+                code=http.HTTPStatus.BAD_REQUEST)
+        return data
+
+    def create(self, validated_data):
+        instance = CrossValidationFold()
+        if validated_data.get("fold_id"):
+            instance.fold_id = validated_data.get("fold_id")
+        else:
+            instance.fold_id = validated_data.get("folder_id") + "_fold_" + get_time_hash(8)
+        instance.save()
+        return instance
+
+class CrossValidationFoldImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CrossValidationFoldimages
+        fields = '__all__'
+
+    def validate(self, data):
+        is_train_data = data.get("train")
+        is_test_data = data.get("test")
+        is_validation_data = data.get("validation")
+
+        if (is_train_data and is_test_data) or (is_train_data and is_validation_data) or (is_validation_data and is_test_data):
+            log.error("The Image can only assume one role inside a fold (train, test, or validation).")
+            raise serializers.ValidationError(
+                {"project_id": "The Image can only assume one role inside a fold (train, test, or validation)."},
+                code=http.HTTPStatus.BAD_REQUEST)
+        return data

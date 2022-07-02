@@ -38,7 +38,7 @@ class ImageMetaDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImageMetaData
-        fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam']
+        fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam', 'synthetic', 'additional_information']
 
 
 class ImageSerializer(serializers.ModelSerializer):

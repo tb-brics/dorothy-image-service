@@ -4,7 +4,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from django.shortcuts import render
 
-from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, Folds, \
+from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
     CrossValidationFolder, CrossValidationFold, CrossValidationCluster, CrossValidationFoldimages
 from .serializers import (DataSetSerializer,
                           ImageSerializer,
@@ -16,7 +16,6 @@ from .serializers import (DataSetSerializer,
                           ImagePostSerializer,
                           PostMetaDataSerializer,
                           Post_Image_AND_MetaDataPostSerializer,
-                          FoldSerializer,
                           CrossValidationClusterSerializer,
                           CrossValidationFolderSerializer,
                           CrossValidationFoldSerializer,
@@ -119,20 +118,6 @@ class Post_Image_AND_MetaDataPostViewSet(viewsets.ModelViewSet):
     queryset = ImageMetaData.objects.all()
     serializer_class = Post_Image_AND_MetaDataPostSerializer
     http_method_names = ['post']
-
-
-class FoldsViewSet(APIView):
-    def get(self, request):
-        folds = Folds.objects.all()
-        serializer = FoldSerializer(folds, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = FoldSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CrossValidationClusterViewSet(viewsets.ModelViewSet):

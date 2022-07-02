@@ -10,7 +10,6 @@ from image_service.views import (DataSetViewSet,
                                  ImagePostViewSet,
                                  MetaDataPostViewSet,
                                  Post_Image_AND_MetaDataPostViewSet,
-                                 FoldsViewSet,
                                  ClusterImagesAPIView,
                                  CrossValidationFoldImagesViewSet,
                                  CrossValidationFoldViewSet,
@@ -47,10 +46,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('api-token-auth/', obtain_auth_token, name = 'api_token_auth'),
-    path('folds/', FoldsViewSet.as_view()),
-    path('cross_validation/cluster', FoldsViewSet.as_view()),
-    path('cross_validation/folder', FoldsViewSet.as_view()),
-    path('cross_validation/fold', FoldsViewSet.as_view()),
     path('cross_validation/images', ClusterImagesAPIView.as_view()),
 
 ]

@@ -121,28 +121,28 @@ class Post_Image_AND_MetaDataPostViewSet(viewsets.ModelViewSet):
 
 
 class CrossValidationClusterViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, UploaderOnly)
+    permission_classes = (IsAuthenticated,)
     queryset = CrossValidationCluster.objects.all()
     serializer_class = CrossValidationClusterSerializer
     http_method_names = ['post', 'get']
 
 
 class CrossValidationFolderViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, UploaderOnly)
+    permission_classes = (IsAuthenticated,)
     queryset = CrossValidationFolder.objects.all()
     serializer_class = CrossValidationFolderSerializer
     http_method_names = ['post', 'get']
 
 
 class CrossValidationFoldViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, UploaderOnly)
+    permission_classes = (IsAuthenticated,)
     queryset = CrossValidationFold.objects.all()
     serializer_class = CrossValidationFoldSerializer
     http_method_names = ['post', 'get']
 
 
 class CrossValidationFoldImagesViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, UploaderOnly)
+    permission_classes = (IsAuthenticated,)
     queryset = CrossValidationFoldimages.objects.all()
     serializer_class = CrossValidationFoldImageSerializer
     http_method_names = ['post', 'get']

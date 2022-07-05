@@ -34,7 +34,7 @@ class Image(models.Model):
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
     image = models.ImageField(upload_to=get_upload_path)
     insertion_date = models.DateField(auto_now_add=True, auto_now=False)
-    project_id = models.CharField(max_length=10000, default="")
+    project_id = models.CharField(max_length=10000, unique=True)
     date_acquisition = models.DateField(auto_now_add=True, auto_now=False, blank=True, null=True)
 
     def __str__(self):
@@ -101,37 +101,23 @@ class ImageSampling(models.Model):
 
 
 class CrossValidationCluster(models.Model):
-    cluster_id = models.CharField(max_length=20)
+    cluster_id = models.CharField(max_length=20, unique=True)
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['cluster_id'], name='cross_validation_cluster_unique')
-        ]
 
 
 class CrossValidationFolder(models.Model):
-    folder_id = models.CharField(max_length=30)
-    cluster_id = models.ForeignKey(CrossValidationCluster, on_delete=models.CASCADE)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['cluster_id', 'folder_id'], name='cross_validation_folder_unique')
-        ]
+    folder_id = models.CharField(max_length=30, unique=True)
+    cluster_id = models.ForeignKey(CrossValidationCluster, to_field='cluster_id', db_column='cluster_id',on_delete=models.CASCADE)
 
 
 class CrossValidationFold(models.Model):
-    fold_id = models.CharField(max_length=50)
-    folder_id = models.ForeignKey(CrossValidationFolder, on_delete=models.CASCADE)
+    fold_id = models.CharField(max_length=50, unique=True)
+    folder_id = models.ForeignKey(CrossValidationFolder, to_field='folder_id', db_column='folder_id', on_delete=models.CASCADE)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['fold_id'], name='cross_validation_fold_unique')
-        ]
 
 class CrossValidationFoldimages(models.Model):
-    fold_id = models.ForeignKey(CrossValidationFold, on_delete=models.CASCADE)
-    project_id = models.ForeignKey(Image, on_delete=models.CASCADE)
+    fold_id = models.ForeignKey(CrossValidationFold, to_field='fold_id', db_column='fold_id', on_delete=models.CASCADE)
+    project_id = models.ForeignKey(Image, to_field='project_id', db_column='project_id', on_delete=models.CASCADE)
     train = models.BooleanField(default=False)
     test = models.BooleanField(default=False)
     validation = models.BooleanField(default=False)

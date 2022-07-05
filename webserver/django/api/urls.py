@@ -36,7 +36,7 @@ router.register(r'post_image_and_metadata', Post_Image_AND_MetaDataPostViewSet)
 router.register(r'cross_validation/cluster', CrossValidationClusterViewSet)
 router.register(r'cross_validation/folder', CrossValidationFolderViewSet)
 router.register(r'cross_validation/fold', CrossValidationFoldViewSet)
-router.register(r'cross_validation/fold/image', CrossValidationFoldImagesViewSet)
+router.register(r'cross_validation/fold_image', CrossValidationFoldImagesViewSet)
 
 
 

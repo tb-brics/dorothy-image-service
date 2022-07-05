@@ -251,11 +251,21 @@ class CrossValidationFolderSerializer(serializers.ModelSerializer):
         model = CrossValidationFolder
         fields = '__all__'
 
+    def validate(self, data):
+        # Verificar se o cluster_id existe
+        if data.get("cluster_id"):
+            return data
+        else:
+            log.error("Missing required field 'cluster_id'.")
+            raise serializers.ValidationError(
+                {"cluster_id": "Missing required field 'cluster_id'."},
+                code=http.HTTPStatus.BAD_REQUEST)
+
     def create(self, validated_data):
         instance = CrossValidationFolder()
         cluster_id = validated_data.get("cluster_id")
-        instance.folder_id = cluster_id + "folder_" + get_time_hash(8)
-        instance.cluster_id = validated_data.get("cluster_id")
+        instance.folder_id = cluster_id.cluster_id + "_folder_" + get_time_hash(8)
+        instance.cluster_id = cluster_id
         instance.save()
         return instance
 
@@ -278,7 +288,8 @@ class CrossValidationFoldSerializer(serializers.ModelSerializer):
         if validated_data.get("fold_id"):
             instance.fold_id = validated_data.get("fold_id")
         else:
-            instance.fold_id = validated_data.get("folder_id") + "_fold_" + get_time_hash(8)
+            instance.fold_id = validated_data.get("folder_id").folder_id + "_fold_" + get_time_hash(8)
+        instance.folder_id = validated_data.get("folder_id")
         instance.save()
         return instance
 
@@ -298,3 +309,9 @@ class CrossValidationFoldImageSerializer(serializers.ModelSerializer):
                 {"project_id": "The Image can only assume one role inside a fold (train, test, or validation)."},
                 code=http.HTTPStatus.BAD_REQUEST)
         return data
+
+    def create(self, validated_data):
+        instance = CrossValidationFoldimages(**validated_data)
+        instance.save()
+        return instance
+

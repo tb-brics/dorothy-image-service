@@ -245,6 +245,10 @@ class CrossValidationClusterSerializer(serializers.ModelSerializer):
         model = CrossValidationCluster
         fields = '__all__'
 
+class CrossValidationClusterFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CrossValidationCluster
+        fields = ('file',)
 
 class CrossValidationFolderSerializer(serializers.ModelSerializer):
     class Meta:

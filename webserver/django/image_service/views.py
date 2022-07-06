@@ -1,8 +1,12 @@
+from io import BytesIO
+
 from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework import generics
 from rest_framework.views import APIView
 from django.shortcuts import render
+
+from PIL import Image as PilImage
 
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
     CrossValidationFolder, CrossValidationFold, CrossValidationCluster, CrossValidationFoldimages
@@ -19,7 +23,8 @@ from .serializers import (DataSetSerializer,
                           CrossValidationClusterSerializer,
                           CrossValidationFolderSerializer,
                           CrossValidationFoldSerializer,
-                          CrossValidationFoldImageSerializer)
+                          CrossValidationFoldImageSerializer,
+                          CrossValidationClusterFileSerializer)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -71,13 +76,53 @@ class ImageFileView(generics.RetrieveAPIView):
     queryset = Image.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
+        gray_scale = request.query_params.get("gray_scale", False)
+        height = request.query_params.get("height", None)
+        width = request.query_params.get("width", None)
+        image_resize = None
+        if height or width:
+            if not height and width:
+                height = width
+            if not width and height:
+                width = height
+            image_resize = (int(width), int(height))
         instance = self.get_object()
         image_path = instance.image.path
+        image_object = None
+        if image_resize:
+            image_object = PilImage.open(image_path)
+            image_object = self._resize_image(image_object, image_resize)
+
+        if gray_scale:
+            if not image_object:
+                image_object = PilImage.open(image_path)
+            image_object = self._convert_to_gray_scale(image_object)
+
+        image_bytes = self._get_image_bytes(image_path=image_path, image_object=image_object)
         try:
-            with open(image_path, 'rb') as img:
-                return HttpResponse(img.read(), content_type='image/png')
+            return HttpResponse(image_bytes, content_type='image/png')
         except Exception as exc:
             return Response({'error': f'Could not read the file. ({exc})'})
+
+    @staticmethod
+    def _get_image_bytes(image_path, image_object: PilImage = None):
+        if not image_object:
+            with open(image_path, "rb") as image_file:
+                image_bytes = image_file.read()
+        else:
+            buffer = BytesIO()
+            image_object.save(buffer, format='PNG')
+            buffer.seek(0)
+            image_bytes = buffer.read()
+        return image_bytes
+
+    @staticmethod
+    def _resize_image(image: PilImage, size) -> PilImage:
+        return image.resize(size)
+
+    @staticmethod
+    def _convert_to_gray_scale(image: PilImage) -> PilImage:
+        return image.convert("L")
 
 
 # POST endpoints:
@@ -127,6 +172,21 @@ class CrossValidationClusterViewSet(viewsets.ModelViewSet):
     http_method_names = ['post', 'get']
 
 
+class CrossValidationClusterFileView(generics.RetrieveAPIView):
+    serializer_class = CrossValidationClusterFileSerializer
+    lookup_field = 'cluster_id'
+    queryset = CrossValidationCluster.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        path = instance.file.path
+        with open(path, "rb") as file:
+            content = file.read()
+        try:
+            return HttpResponse(content, content_type='application/octet-stream')
+        except Exception as exc:
+            return Response({'error': f'Could not read the file. ({exc})'})
+
 class CrossValidationFolderViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = CrossValidationFolder.objects.all()
@@ -162,7 +222,7 @@ class ClusterImagesAPIView(APIView):
 
         if fold_type:
             if fold_type == "train":
-                query_set = CrossValidationFoldimages.objects.filter(train=True,**query_filter).all()
+                query_set = CrossValidationFoldimages.objects.filter(train=True, **query_filter).all()
             elif fold_type == "test":
                 query_set = CrossValidationFoldimages.objects.filter(test=True, **query_filter).all()
             else:

@@ -14,7 +14,8 @@ from image_service.views import (DataSetViewSet,
                                  CrossValidationFoldImagesViewSet,
                                  CrossValidationFoldViewSet,
                                  CrossValidationFolderViewSet,
-                                 CrossValidationClusterViewSet
+                                 CrossValidationClusterViewSet,
+                                 CrossValidationClusterFileView
                                  )
 from rest_framework import routers
 from django.conf import settings
@@ -42,10 +43,10 @@ router.register(r'cross_validation/fold_image', CrossValidationFoldImagesViewSet
 
 urlpatterns = [
     re_path('^image/(?P<project_id>\w+)/$', ImageFileView.as_view(), name="image_file"),
+    re_path('^media/.*/(?P<cluster_id>\w+)/$', CrossValidationClusterFileView.as_view(), name="cluster_file"),
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('api-token-auth/', obtain_auth_token, name = 'api_token_auth'),
     path('cross_validation/images', ClusterImagesAPIView.as_view()),
-
 ]

@@ -103,6 +103,14 @@ class ImageSampling(models.Model):
 class CrossValidationCluster(models.Model):
     cluster_id = models.CharField(max_length=20, unique=True)
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
+    file = models.FileField(upload_to=get_upload_path, default=None)
+
+    def __str__(self):
+        return self.cluster_id
+
+    def save(self, *args, **kwargs):
+        self.file.name = f"{self.cluster_id}"
+        super(CrossValidationCluster, self).save(*args, **kwargs)
 
 
 class CrossValidationFolder(models.Model):

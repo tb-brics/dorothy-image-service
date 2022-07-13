@@ -89,6 +89,8 @@ class ImageFileView(generics.RetrieveAPIView):
         instance = self.get_object()
         image_path = instance.image.path
         image_object = None
+        image_format = self.extract_image_format(image_path)
+        content_type = f'image/{image_format}' if image_format else 'application/octet-stream'
         if image_resize:
             image_object = PilImage.open(image_path)
             image_object = self._resize_image(image_object, image_resize)
@@ -98,20 +100,20 @@ class ImageFileView(generics.RetrieveAPIView):
                 image_object = PilImage.open(image_path)
             image_object = self._convert_to_gray_scale(image_object)
 
-        image_bytes = self._get_image_bytes(image_path=image_path, image_object=image_object)
+        image_bytes = self._get_image_bytes(image_path=image_path, image_object=image_object, image_format=image_format or "PNG")
         try:
-            return HttpResponse(image_bytes, content_type='image/png')
+            return HttpResponse(image_bytes, content_type=content_type)
         except Exception as exc:
             return Response({'error': f'Could not read the file. ({exc})'})
 
     @staticmethod
-    def _get_image_bytes(image_path, image_object: PilImage = None):
+    def _get_image_bytes(image_path, image_object: PilImage = None, image_format: str = "PNG"):
         if not image_object:
             with open(image_path, "rb") as image_file:
                 image_bytes = image_file.read()
         else:
             buffer = BytesIO()
-            image_object.save(buffer, format='PNG')
+            image_object.save(buffer, format=image_format.upper())
             buffer.seek(0)
             image_bytes = buffer.read()
         return image_bytes
@@ -123,6 +125,16 @@ class ImageFileView(generics.RetrieveAPIView):
     @staticmethod
     def _convert_to_gray_scale(image: PilImage) -> PilImage:
         return image.convert("L")
+
+    @staticmethod
+    def extract_image_format(image_path: str) -> str:
+        image_format = str(image_path.split(".")[-1]).upper() or "PNG"
+        if image_format == "JPG":
+            image_format = "JPEG"
+        if image_format not in ["PNG", "JPEG", "SVG"]:
+            return None
+        else:
+            return image_format
 
 
 # POST endpoints:
@@ -186,6 +198,7 @@ class CrossValidationClusterFileView(generics.RetrieveAPIView):
             return HttpResponse(content, content_type='application/octet-stream')
         except Exception as exc:
             return Response({'error': f'Could not read the file. ({exc})'})
+
 
 class CrossValidationFolderViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)

@@ -1,4 +1,4 @@
-name: "dqms-release"
+name: "dorothy-release"
 
 on:
   push:

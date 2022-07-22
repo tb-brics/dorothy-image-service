@@ -1,0 +1,40 @@
+name: "dqms-release"
+
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  tagged-release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set tag var
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          title: "${{ steps.vars.outputs.tag }}"
+  push_diane_to_registry:
+    name: Push DOROTHY Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Login to the Docker hub
+        env:
+          DOCKER_USERNAME: "${{ secrets.DOCKER_USERNAME }}"
+          DOCKER_PASSWORD: "${{ secrets.DOCKER_PASSWORD }}"
+          IMAGE_TAG: "${{ env.RELEASE_VERSION }}"
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - name: Build the Docker image
+        env:
+          DOCKER_USERNAME: "${{ secrets.DOCKER_USERNAME }}"
+        run: docker build ./webserver/ --file webserver/Dockerfile --tag=tbbrics/dorothy-image-service-web:$RELEASE_VERSION
+      - name: Docker Push
+        env:
+          DOCKER_USERNAME: "${{ secrets.DOCKER_USERNAME }}"
+        run: docker push tbbrics/dorothy-image-service-web:$RELEASE_VERSION

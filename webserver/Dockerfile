@@ -51,5 +51,5 @@ COPY django ./
 
 #Setting up Django (static content and messages)
 #DO NOT DO THE DB MIGRATION HERE!
-RUN python manage.py collectstatic --no-input
+#RUN python manage.py collectstatic --no-input
 #RUN django-admin compilemessages

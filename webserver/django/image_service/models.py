@@ -1,12 +1,10 @@
 """Importing models module to create models classes"""
 import hashlib
-from django.db import models
-from django.conf import settings
-import datetime
 import os
+
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.db.models import JSONField
 from django.conf import settings
 
 

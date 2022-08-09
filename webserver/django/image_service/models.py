@@ -113,7 +113,8 @@ class CrossValidationCluster(models.Model):
 
 class CrossValidationFolder(models.Model):
     folder_id = models.CharField(max_length=30, unique=True)
-    cluster_id = models.ForeignKey(CrossValidationCluster, to_field='cluster_id', db_column='cluster_id',on_delete=models.CASCADE)
+    cluster_id = models.ForeignKey(CrossValidationCluster, to_field='cluster_id', db_column='cluster_id',
+                                   on_delete=models.CASCADE)
 
 
 class CrossValidationFold(models.Model):
@@ -131,4 +132,19 @@ class CrossValidationFoldimages(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['project_id', 'fold_id'], name='cross_validation_fold_image_unique')
+        ]
+
+
+class DataQualityAnnotation(models.Model):
+    project_id = models.ForeignKey(Image, to_field='project_id', db_column='project_id', on_delete=models.CASCADE)
+    under_penetrated = models.BooleanField(null=True)
+    over_penetrated = models.BooleanField(null=True)
+    costophrenic_cropped = models.BooleanField(null=True)
+    apices_cropped = models.BooleanField(null=True)
+    insertion_date = models.DateField(auto_now_add=True, auto_now=False)
+    reliable_radiography = models.BooleanField(null=True)
+    minimum_interpretation_quality = models.BooleanField(null=True)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['project_id'], name='data_quality_annotation_unique')
         ]

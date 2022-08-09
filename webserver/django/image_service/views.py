@@ -1,15 +1,16 @@
 from io import BytesIO
 
 from django.http import HttpResponse
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework import generics
 from rest_framework.views import APIView
 from django.shortcuts import render
 
 from PIL import Image as PilImage
+from PIL import ImageOps
 
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
-    CrossValidationFolder, CrossValidationFold, CrossValidationCluster, CrossValidationFoldimages
+    CrossValidationFolder, CrossValidationFold, CrossValidationCluster, CrossValidationFoldimages, DataQualityAnnotation
 from .serializers import (DataSetSerializer,
                           ImageSerializer,
                           ImageMetaDataSerializer,
@@ -24,7 +25,8 @@ from .serializers import (DataSetSerializer,
                           CrossValidationFolderSerializer,
                           CrossValidationFoldSerializer,
                           CrossValidationFoldImageSerializer,
-                          CrossValidationClusterFileSerializer)
+                          CrossValidationClusterFileSerializer,
+                          DataQualityAnnotationSerializer)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -40,6 +42,16 @@ class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = DataSet.objects.all()
     serializer_class = DataSetSerializer
+
+
+class DataQualityAnnotationViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = DataQualityAnnotation.objects.all()
+    serializer_class = DataQualityAnnotationSerializer
+    filter_backends = SearchFilter
+    search_fields = (['project_id'])
+    http_method_names = ['post', 'get']
+
 
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):
@@ -60,6 +72,8 @@ class ReportViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
+    filter_backends = SearchFilter
+    search_fields = (['image__project_id', 'performed_by'])
 
 
 class ImageSamplingViewSet(viewsets.ReadOnlyModelViewSet):
@@ -93,11 +107,13 @@ class ImageFileView(generics.RetrieveAPIView):
         content_type = f'image/{image_format}' if image_format else 'application/octet-stream'
         if image_resize:
             image_object = PilImage.open(image_path)
+            image_object = ImageOps.exif_transpose(image_object)
             image_object = self._resize_image(image_object, image_resize)
 
         if gray_scale:
             if not image_object:
                 image_object = PilImage.open(image_path)
+                image_object = ImageOps.exif_transpose(image_object)
             image_object = self._convert_to_gray_scale(image_object)
 
         image_bytes = self._get_image_bytes(image_path=image_path, image_object=image_object, image_format=image_format or "PNG")

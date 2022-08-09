@@ -6,7 +6,7 @@ from re import I
 from django.urls import reverse
 from rest_framework import serializers
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
-    CrossValidationFold, CrossValidationFolder, CrossValidationCluster, CrossValidationFoldimages
+    CrossValidationFold, CrossValidationFolder, CrossValidationCluster, CrossValidationFoldimages, DataQualityAnnotation
 
 import json
 
@@ -33,12 +33,26 @@ class DataSetSerializer(serializers.ModelSerializer):
         fields = ['name', 'image_formats', 'number_images']
 
 
+class DataQualityAnnotationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DataQualityAnnotation
+        fields = ['project_id',
+                  'under_penetrated',
+                  'over_penetrated',
+                  'costophrenic_cropped',
+                  'Apices_cropped',
+                  'reliable_radiography',
+                  'minimum_interpretation_quality',
+                  'number_images']
+
+
 class ImageMetaDataSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name", read_only=True)
 
     class Meta:
         model = ImageMetaData
-        fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam', 'synthetic', 'additional_information']
+        fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam', 'synthetic',
+                  'additional_information']
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -245,10 +259,12 @@ class CrossValidationClusterSerializer(serializers.ModelSerializer):
         model = CrossValidationCluster
         fields = '__all__'
 
+
 class CrossValidationClusterFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CrossValidationCluster
         fields = ('file',)
+
 
 class CrossValidationFolderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -297,6 +313,7 @@ class CrossValidationFoldSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
 class CrossValidationFoldImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CrossValidationFoldimages
@@ -318,4 +335,3 @@ class CrossValidationFoldImageSerializer(serializers.ModelSerializer):
         instance = CrossValidationFoldimages(**validated_data)
         instance.save()
         return instance
-

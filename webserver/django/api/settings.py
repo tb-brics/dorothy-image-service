@@ -16,7 +16,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve()
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -31,7 +30,12 @@ ALLOWED_HOSTS = ['dorothy', 'dorothy-qa.azurewebsites.net', 'dorothy-image.lps.u
 if DEBUG or ALLOW_LOCALHOST:
     ALLOWED_HOSTS.append('localhost')
     ALLOWED_HOSTS.append('host.docker.internal')
-
+    ALLOWED_HOSTS.append('0.0.0.0:8000')
+    ALLOWED_HOSTS.append('0.0.0.0')
+    ALLOWED_HOSTS.append('127.0.0.1')
+    ALLOWED_HOSTS.append('127.0.0.1:8000')
+    ALLOWED_HOSTS.append('django')
+    ALLOWED_HOSTS.append('django-server')
 
 # Application definition
 
@@ -84,21 +88,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'api.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE':'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME','postgres'),
-        'USER': os.environ.get('DB_USER','postgres'),
-        'PASSWORD': os.environ.get('DB_PASS','R2E)5Dqd5ixizrU>+[mR'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'postgres'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASS', 'R2E)5Dqd5ixizrU>+[mR'),
         'HOST': 'db',
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -118,7 +120,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -135,19 +136,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-#This value must match the value for STATIC LOCATION in NGinx config file
+# This value must match the value for STATIC LOCATION in NGinx config file
 STATIC_URL = '/static/'
 
-#This value must match the value for STATIC ALIAS in NGinx config file
-STATIC_ROOT =  '/var/www/dorothy/static/'
+# This value must match the value for STATIC ALIAS in NGinx config file
+STATIC_ROOT = '/var/www/dorothy/static/'
 
-#Defining the base dir where the x-ray images will stay.
-#This value must match the value for MEDIA ALIAS in NGinx config file
-MEDIA_ROOT='/imagesrep/'
+# Defining the base dir where the x-ray images will stay.
+# This value must match the value for MEDIA ALIAS in NGinx config file
+MEDIA_ROOT = '/imagesrep/'
 
-#Base URL to serve the x-ray images.
-#This value must match the value for MEDIA LOCATION in NGinx config file
-MEDIA_URL='/media/'
+# Base URL to serve the x-ray images.
+# This value must match the value for MEDIA LOCATION in NGinx config file
+MEDIA_URL = '/media/'
 
 LOG_LEVEL_SETUP = 'INFO'
 LOG_FORMAT_SETUP = 'verbose'

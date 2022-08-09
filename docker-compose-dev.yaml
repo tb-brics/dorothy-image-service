@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13.0
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=R2E)5Dqd5ixizrU>+[mR
+    volumes:
+      - PostgresDB:/var/lib/postgresql/data
+  web:
+      command: python ./webserver/django/manage.py runserver 0.0.0.0:80
+      build: ./webserver
+      volumes:
+          #This will map your dev environment into the container so you
+          #won't need to rebuild the container at each code change. It will map
+          #the entire project so if you use VS Code yu will be able to attach to
+          #the container and use Git-related resources.
+          - .:/service
+          - ImagesRep:/imagesrep
+      ports:
+          - "8000:80"
+      environment:
+          DEBUG: 'true'
+volumes:
+    PostgresDB:
+    ImagesRep:

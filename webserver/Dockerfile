@@ -17,9 +17,6 @@ RUN groupadd -g 10001 datasets
 RUN usermod -a -G datasets root
 RUN usermod -a -G datasets www-data
 
-#Configuring NGINX for handling static contents.
-COPY server/nginx.default /etc/nginx/sites-available/default
-
 #Setting working environment
 WORKDIR /service
 
@@ -35,21 +32,50 @@ RUN chown -R www-data:datasets /imagesrep
 RUN chmod -R 775 /imagesrep
 
 #Creating folder to contain static files.
-RUN mkdir -p /software/dorothy/static
-RUN chown -R www-data:www-data /software/dorothy/static
+RUN mkdir -p /var/www/dorothy/static/
+RUN chown -R www-data:www-data /var/www/dorothy/static/
 
 #Creating folder for dorothy logs
 RUN mkdir -p /var/log/dorothy
 RUN chown -R www-data:www-data /var/log/dorothy
 
+#Creating folder for mlflow logs
+RUN mkdir -p /var/log/mlflow
+RUN chown -R www-data:www-data /var/log/mlflow
+
+# Creating folder to serve as backend storage for mlflow
+RUN mkdir -p /service/mlflow/db/
+RUN chown -R www-data:www-data /service/mlflow/db/
+RUN chmod 775 /service/mlflow/db/
+RUN touch /service/mlflow/db/storage.db
+RUN chown -R www-data:www-data /service/mlflow/db/storage.db
+
+
+# Creating folder to serve as artifact root
+RUN mkdir -p /service/mlflow/mlruns/
+RUN chown -R www-data:www-data /service/mlflow/mlruns/
+
+# Creating folder to serve as artifact
+RUN mkdir -p /service/mlflow/artifacts/
+RUN chown -R www-data:www-data /service/mlflow/artifacts/
+
+
+#Configuring NGINX for handling static contents.
+#COPY server/nginx.default /etc/nginx/sites-available/default
+#COPY ./nginx.default /etc/nginx/nginx.default
+COPY server/nginx.conf /etc/nginx/nginx.conf
+
 #Copying script that will start GUnicorn and NGinx web servers.
-COPY server/run_server.sh ./
-COPY server/gunicorn_config.py ./
+COPY server/ ./server/
+RUN chmod -R 755 ./server
+
 
 #Copying necessary files for production execution.
 COPY django ./
 
 #Setting up Django (static content and messages)
 #DO NOT DO THE DB MIGRATION HERE!
-#RUN python manage.py collectstatic --no-input
+RUN python manage.py collectstatic --no-input
 #RUN django-admin compilemessages
+
+

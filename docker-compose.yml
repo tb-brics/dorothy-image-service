@@ -9,14 +9,34 @@ services:
       - POSTGRES_PASSWORD=R2E)5Dqd5ixizrU>+[mR
     volumes:
         - PostgresDB:/var/lib/postgresql/data
-  web:
-    image: tbbrics/dorothy-image-service-web:${DEPLOY_ENVIRONMENT:-latest}
-    command: ./run_server.sh
+  dorothy-image:
+    image: tbbrics/dorothy-image-service-web:latest
+    command: ./server/run_nginx.sh
     volumes:
       - ImagesRep:/imagesrep
     depends_on:
       - db
-
+    ports:
+      - "80:80"
+      - "8000:8000"
+    environment:
+      DEBUG: 'true'
+  mlflow:
+    image: tbbrics/dorothy-image-service-web:latest
+    command: ./server/mlflow/run_mlflow.sh
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+#  nginx:
+#    image: tbbrics/dorothy-image-service-web:latest
+#    command: ./server/run_nginx.sh
+#    depends_on:
+#      - mlflow
+#      - dorothy-image
+#    ports:
+#      - "80:80"
+#      - "443:443"
 volumes:
     PostgresDB:
     ImagesRep:

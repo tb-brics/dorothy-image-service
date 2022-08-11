@@ -39,35 +39,17 @@ RUN chown -R www-data:www-data /var/www/dorothy/static/
 RUN mkdir -p /var/log/dorothy
 RUN chown -R www-data:www-data /var/log/dorothy
 
-#Creating folder for mlflow logs
-RUN mkdir -p /var/log/mlflow
-RUN chown -R www-data:www-data /var/log/mlflow
-
-# Creating folder to serve as backend storage for mlflow
-RUN mkdir -p /service/mlflow/db/
-RUN chown -R www-data:www-data /service/mlflow/db/
-RUN chmod 775 /service/mlflow/db/
-RUN touch /service/mlflow/db/storage.db
-RUN chown -R www-data:www-data /service/mlflow/db/storage.db
-
-
-# Creating folder to serve as artifact root
-RUN mkdir -p /service/mlflow/mlruns/
-RUN chown -R www-data:www-data /service/mlflow/mlruns/
-
-# Creating folder to serve as artifact
-RUN mkdir -p /service/mlflow/artifacts/
-RUN chown -R www-data:www-data /service/mlflow/artifacts/
-
 
 #Configuring NGINX for handling static contents.
-#COPY server/nginx.default /etc/nginx/sites-available/default
+COPY server/nginx.default /etc/nginx/sites-available/default
 #COPY ./nginx.default /etc/nginx/nginx.default
-COPY server/nginx.conf /etc/nginx/nginx.conf
+#COPY server/nginx.conf /etc/nginx/nginx.conf
 
 #Copying script that will start GUnicorn and NGinx web servers.
-COPY server/ ./server/
-RUN chmod -R 755 ./server
+COPY server/gunicorn_config.py ./gunicorn_config.py
+RUN chmod -R 755 ./gunicorn_config.py
+COPY server/run_server.sh ./run_server.sh
+RUN chmod -R 755 ./run_server.sh
 
 
 #Copying necessary files for production execution.
@@ -77,5 +59,3 @@ COPY django ./
 #DO NOT DO THE DB MIGRATION HERE!
 RUN python manage.py collectstatic --no-input
 #RUN django-admin compilemessages
-
-

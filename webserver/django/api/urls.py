@@ -35,7 +35,7 @@ router.register(r'cross_validation/cluster', CrossValidationClusterViewSet)
 router.register(r'cross_validation/folder', CrossValidationFolderViewSet)
 router.register(r'cross_validation/fold', CrossValidationFoldViewSet)
 router.register(r'cross_validation/fold_image', CrossValidationFoldImagesViewSet)
-router.register(r'annotation', DataQualityAnnotationViewSet)
+router.register(r'annotation', DataQualityAnnotationViewSet, basename='DataQualityAnnotation')
 
 urlpatterns = [
     re_path('^image/(?P<project_id>\w+)/$', ImageFileView.as_view(), name="image_file"),

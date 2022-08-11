@@ -36,14 +36,15 @@ class DataSetSerializer(serializers.ModelSerializer):
 class DataQualityAnnotationSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataQualityAnnotation
-        fields = ['project_id',
-                  'under_penetrated',
-                  'over_penetrated',
-                  'costophrenic_cropped',
-                  'apices_cropped',
-                  'reliable_radiography',
-                  'minimum_interpretation_quality',
-                  'number_images']
+        fields = [
+            'project_id',
+            'under_penetrated',
+            'over_penetrated',
+            'costophrenic_cropped',
+            'apices_cropped',
+            'reliable_radiography',
+            'minimum_interpretation_quality'
+        ]
 
 
 class ImageMetaDataSerializer(serializers.ModelSerializer):

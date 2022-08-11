@@ -40,7 +40,7 @@ class DataQualityAnnotationSerializer(serializers.ModelSerializer):
                   'under_penetrated',
                   'over_penetrated',
                   'costophrenic_cropped',
-                  'Apices_cropped',
+                  'apices_cropped',
                   'reliable_radiography',
                   'minimum_interpretation_quality',
                   'number_images']

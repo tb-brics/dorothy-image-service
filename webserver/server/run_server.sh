@@ -1,8 +1,3 @@
 #!/usr/bin/env bash
-
-echo "Starting GUnicorn for handling dynamic content."
-gunicorn --config gunicorn_config.py api.wsgi &
-
-#Make sure that NGinx is saving its logs to the same path as GUnicorn.
-echo "Starting NGinx for serving static content."
-nginx -g "daemon off;"
+echo "starting server"
+python manage.py runserver 0.0.0.0:8000

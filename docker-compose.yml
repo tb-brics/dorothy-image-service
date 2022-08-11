@@ -11,23 +11,20 @@ services:
         - PostgresDB:/var/lib/postgresql/data
   dorothy-image:
     image: tbbrics/dorothy-image-service-web:latest
-    command: ./server/run_nginx.sh
+    command: ./run_server.sh
     volumes:
       - ImagesRep:/imagesrep
     depends_on:
       - db
     ports:
-      - "80:80"
-      - "8000:8000"
+      - "80:8000"
     environment:
       DEBUG: 'true'
   mlflow:
-    image: tbbrics/dorothy-image-service-web:latest
-    command: ./server/mlflow/run_mlflow.sh
-    depends_on:
-      - db
+    image: tbbrics/dorothy-mlflow-service:latest
+    command: ./run_mlflow.sh
     ports:
-      - "5000:5000"
+      - "5000:80"
 #  nginx:
 #    image: tbbrics/dorothy-image-service-web:latest
 #    command: ./server/run_nginx.sh

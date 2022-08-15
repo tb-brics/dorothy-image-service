@@ -46,12 +46,21 @@ class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
 
 class DataQualityAnnotationViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
-    queryset = DataQualityAnnotation.objects.all()
     serializer_class = DataQualityAnnotationSerializer
-    filter_backends = SearchFilter
-    search_fields = (['project_id'])
+    # filter_backends = SearchFilter
+    # search_fields = (['project_id'])
     http_method_names = ['post', 'get']
 
+    def get_queryset(self):
+        """
+        Optionally restricts the returned purchases to a given user,
+        by filtering against a `username` query parameter in the URL.
+        """
+        queryset = DataQualityAnnotation.objects.all()
+        project_id = self.request.query_params.get('project_id')
+        if project_id is not None:
+            queryset = queryset.filter(project_id=project_id)
+        return queryset
 
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):

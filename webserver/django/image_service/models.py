@@ -136,7 +136,7 @@ class CrossValidationFoldimages(models.Model):
 
 
 class DataQualityAnnotation(models.Model):
-    project_id = models.ForeignKey(Image, to_field='project_id', db_column='project_id', on_delete=models.CASCADE)
+    project_id = models.ForeignKey(Image, to_field="project_id", db_column='project_id', on_delete=models.CASCADE)
     under_penetrated = models.BooleanField(null=True)
     over_penetrated = models.BooleanField(null=True)
     costophrenic_cropped = models.BooleanField(null=True)

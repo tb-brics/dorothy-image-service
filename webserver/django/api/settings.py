@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
+# import mimetypes
+#
+# mimetypes.add_type("text/css", ".css", True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve()
@@ -26,7 +29,7 @@ SECRET_KEY = 'gpr+ts9e5bp2ith=o9&4e6d4hj8(t)l-4mlzt@!c6hei5!o882'
 DEBUG = os.environ.get('DEBUG', 'false') == 'true'
 ALLOW_LOCALHOST = os.environ.get('ALLOW_LOCALHOST', 'false') == 'true'
 
-ALLOWED_HOSTS = ['dorothy', 'dorothy-qa.azurewebsites.net', 'dorothy-image.lps.ufrj.br']
+ALLOWED_HOSTS = ['dorothy', 'dorothy-qa.azurewebsites.net', 'dorothy-image.lps.ufrj.br', '127.0.0.1', '0.0.0.0']
 if DEBUG or ALLOW_LOCALHOST:
     ALLOWED_HOSTS.append('localhost')
     ALLOWED_HOSTS.append('host.docker.internal')
@@ -36,6 +39,12 @@ if DEBUG or ALLOW_LOCALHOST:
     ALLOWED_HOSTS.append('127.0.0.1:8000')
     ALLOWED_HOSTS.append('django')
     ALLOWED_HOSTS.append('django-server')
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*', 'http://*', 'http://*.lps.ufrj.br', 'https://*.lps.ufrj.br'
+]
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_DOMAIN = '.lps.ufrj.br'
 
 # Application definition
 

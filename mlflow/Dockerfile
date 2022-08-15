@@ -26,36 +26,38 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 RUN rm requirements.txt
 
-#Here is where we will mount the volume containing all the x-ray images
-RUN mkdir /imagesrep
-RUN chown -R www-data:datasets /imagesrep
-RUN chmod -R 775 /imagesrep
+#Creating folder for mlflow logs
+RUN mkdir -p /var/log/mlflow
+RUN chown -R www-data:www-data /var/log/mlflow
 
-#Creating folder to contain static files.
-RUN mkdir -p /var/www/dorothy/static/
-RUN chown -R www-data:www-data /var/www/dorothy/static/
+# Creating folder to serve as backend storage for mlflow
+RUN mkdir -p /service/mlflow/db/
+RUN chown -R www-data:www-data /service/mlflow/db/
+RUN chmod 775 /service/mlflow/db/
+RUN touch /service/mlflow/db/storage.db
+RUN chown -R www-data:www-data /service/mlflow/db/storage.db
+RUN chmod 775 /service/mlflow/db/storage.db
 
-#Creating folder for dorothy logs
-RUN mkdir -p /var/log/dorothy
-RUN chown -R www-data:www-data /var/log/dorothy
 
+# Creating folder to serve as artifact root
+RUN mkdir -p /service/mlflow/mlruns/
+RUN chown -R www-data:www-data /service/mlflow/mlruns/
+
+# Creating folder to serve as artifact
+RUN mkdir -p /service/mlflow/artifacts/
+RUN chown -R www-data:www-data /service/mlflow/artifacts/
+
+
+RUN chown -R www-data:www-data /service/mlflow/
+RUN chmod 775 /service/mlflow/
+
+COPY gunicorn_config.py ./gunicorn_config.py
+RUN chmod -R 755 ./gunicorn_config.py
 
 #Configuring NGINX for handling static contents.
-COPY server/nginx.default /etc/nginx/sites-available/default
-#COPY ./nginx.default /etc/nginx/nginx.default
-#COPY server/nginx.conf /etc/nginx/nginx.conf
+COPY nginx.default /etc/nginx/sites-available/default
 
-#Copying script that will start GUnicorn and NGinx web servers.
-COPY server/gunicorn_config.py ./gunicorn_config.py
-RUN chmod -R 755 ./gunicorn_config.py
-COPY server/run_server.sh ./run_server.sh
-RUN chmod -R 755 ./run_server.sh
-
-
-#Copying necessary files for production execution.
-COPY django ./
-
-#Setting up Django (static content and messages)
-#DO NOT DO THE DB MIGRATION HERE!
-RUN python manage.py collectstatic --no-input
-#RUN django-admin compilemessages
+# Run mlflow
+COPY run_mlflow.sh /service/run_mlflow.sh
+RUN chmod -R 755 /service/run_mlflow.sh
+RUN chown -R www-data:www-data /service/

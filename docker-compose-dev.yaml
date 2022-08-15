@@ -10,7 +10,7 @@ services:
     volumes:
       - PostgresDB:/var/lib/postgresql/data
   web:
-      command: python ./webserver/django/manage.py runserver 0.0.0.0:80
+      command: python3 ./webserver/django/manage.py runserver 0.0.0.0:80
       build: ./webserver
       volumes:
           #This will map your dev environment into the container so you
@@ -20,7 +20,7 @@ services:
           - .:/service
           - ImagesRep:/imagesrep
       ports:
-          - "8000:80"
+          - "80:80"
       environment:
           DEBUG: 'true'
 volumes:

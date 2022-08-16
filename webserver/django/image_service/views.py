@@ -214,13 +214,17 @@ class CrossValidationClusterFileView(generics.RetrieveAPIView):
     lookup_field = 'cluster_id'
     queryset = CrossValidationCluster.objects.all()
 
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         path = instance.file.path
         with open(path, "rb") as file:
             content = file.read()
         try:
-            return HttpResponse(content, content_type='application/octet-stream')
+            response = HttpResponse(content, content_type='application/octet-stream')
+            response['Content-Disposition'] =f"attachment; filename={instance.cluster_id}.pkl"
+
+            return response
         except Exception as exc:
             return Response({'error': f'Could not read the file. ({exc})'})
 

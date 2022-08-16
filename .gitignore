@@ -5,3 +5,4 @@ __pycache__
 *.mo
 .vscode
 .pytest_cache
+./webserver/django/image_service/migrations

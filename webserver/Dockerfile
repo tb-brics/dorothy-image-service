@@ -31,6 +31,11 @@ RUN mkdir /imagesrep
 RUN chown -R www-data:datasets /imagesrep
 RUN chmod -R 775 /imagesrep
 
+#
+RUN mkdir /imagesrep/clusters
+RUN chown -R www-data:datasets /imagesrep/clusters
+RUN chmod -R 775 /imagesrep/clusters
+
 #Creating folder to contain static files.
 RUN mkdir -p /var/www/dorothy/static/
 RUN chown -R www-data:www-data /var/www/dorothy/static/

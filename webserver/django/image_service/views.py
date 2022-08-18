@@ -287,7 +287,7 @@ class ValidatorOnly(BasePermission):
         return False
 
 class ImageValidationViewSet(viewsets.ReadOnlyModelViewSet):
-    #permission_classes = (IsAuthenticated, ValidatorOnly,)
+    permission_classes = (IsAuthenticated, ValidatorOnly,)
     queryset = ImageValidation.objects.all()
     serializer_class = ImageValidationSerializer
     filter_backends = (SearchFilter, OrderingFilter)

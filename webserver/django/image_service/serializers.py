@@ -359,7 +359,7 @@ class ImageValidationSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         request = self.context.get('request')
-        url = reverse('image_file', kwargs={'project_id': obj.project_id})
+        url = reverse('image_validation_file', kwargs={'project_id': obj.project_id})
         return request.build_absolute_uri(url)
 
     class Meta:
@@ -371,3 +371,9 @@ class ImageValidationSerializer(serializers.ModelSerializer):
                   'metadata',
                   'date_acquisition',
                   'number_reports']
+
+
+class ImageValidationFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImageValidation
+        fields = ('image',)

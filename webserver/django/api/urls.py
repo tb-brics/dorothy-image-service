@@ -16,7 +16,8 @@ from image_service.views import (DataSetViewSet,
                                  CrossValidationClusterViewSet,
                                  CrossValidationClusterFileView,
                                  DataQualityAnnotationViewSet,
-                                 ImageValidationViewSet
+                                 ImageValidationViewSet,
+                                 ImageValidationFileView
                                  )
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
@@ -39,6 +40,7 @@ router.register(r'image_validation', ImageValidationViewSet)
 
 urlpatterns = [
     re_path('^image/(?P<project_id>\w+)/$', ImageFileView.as_view(), name="image_file"),
+    re_path('^image_validation/(?P<project_id>\w+)/$', ImageValidationFileView.as_view(), name="image_validation_file"),
     re_path('^media/.*/(?P<cluster_id>\w+)/$', CrossValidationClusterFileView.as_view(), name="cluster_file"),
     path('', include(router.urls)),
     path('admin/', admin.site.urls),

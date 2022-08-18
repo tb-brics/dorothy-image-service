@@ -167,7 +167,7 @@ class ImageValidation(models.Model):
         hash.update(self.image.read())
         image_hash = hash.hexdigest().upper()
         self.project_id = f"{dataset_name[:5]}_{image_filename}_{image_hash[:6]}"
-        super(Image, self).save(*args, **kwargs)
+        super(ImageValidation, self).save(*args, **kwargs)
 
 
 class ImageMetaDataValidation(models.Model):

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, CrossValidationCluster, CrossValidationFold, CrossValidationFolder, CrossValidationFoldimages,DataQualityAnnotation
+from .models import DataSet, Image, ImageMetaData, ImageMetaDataValidation, ImageValidation, Report, ImageSampling, CrossValidationCluster, CrossValidationFold, CrossValidationFolder, CrossValidationFoldimages,DataQualityAnnotation
 # Register your models here.
 
 admin.site.register(DataSet)
@@ -12,3 +12,5 @@ admin.site.register(CrossValidationFolder)
 admin.site.register(CrossValidationFold)
 admin.site.register(CrossValidationFoldimages)
 admin.site.register(DataQualityAnnotation)
+admin.site.register(ImageValidation)
+admin.site.register(ImageMetaDataValidation)

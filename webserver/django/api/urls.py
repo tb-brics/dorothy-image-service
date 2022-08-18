@@ -3,7 +3,6 @@ from django.urls import path, include, re_path
 from image_service.views import (DataSetViewSet,
                                  ImageFileView,
                                  ImageViewSet,
-                                 ImageMetaDataViewSet,
                                  ReportViewSet,
                                  ImageSamplingViewSet,
                                  DataSetPostViewSet,
@@ -16,7 +15,8 @@ from image_service.views import (DataSetViewSet,
                                  CrossValidationFolderViewSet,
                                  CrossValidationClusterViewSet,
                                  CrossValidationClusterFileView,
-                                 DataQualityAnnotationViewSet
+                                 DataQualityAnnotationViewSet,
+                                 ImageValidationViewSet
                                  )
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
@@ -35,6 +35,7 @@ router.register(r'cross_validation/folder', CrossValidationFolderViewSet)
 router.register(r'cross_validation/fold', CrossValidationFoldViewSet)
 router.register(r'cross_validation/fold_image', CrossValidationFoldImagesViewSet)
 router.register(r'annotation', DataQualityAnnotationViewSet, basename='DataQualityAnnotation')
+router.register(r'image_validation', ImageValidationViewSet)
 
 urlpatterns = [
     re_path('^image/(?P<project_id>\w+)/$', ImageFileView.as_view(), name="image_file"),

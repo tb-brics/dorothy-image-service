@@ -10,7 +10,8 @@ from PIL import Image as PilImage
 from PIL import ImageOps
 
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
-    CrossValidationFolder, CrossValidationFold, CrossValidationCluster, CrossValidationFoldimages, DataQualityAnnotation
+    CrossValidationFolder, CrossValidationFold, CrossValidationCluster, CrossValidationFoldimages, \
+    DataQualityAnnotation, ImageValidation, ImageMetaDataValidation
 from .serializers import (DataSetSerializer,
                           ImageSerializer,
                           ImageMetaDataSerializer,
@@ -26,7 +27,9 @@ from .serializers import (DataSetSerializer,
                           CrossValidationFoldSerializer,
                           CrossValidationFoldImageSerializer,
                           CrossValidationClusterFileSerializer,
-                          DataQualityAnnotationSerializer)
+                          DataQualityAnnotationSerializer,
+                          ImageValidationSerializer,
+                          ImageMetaDataValidationSerializer)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -273,3 +276,24 @@ class ClusterImagesAPIView(APIView):
             query_set = CrossValidationFoldimages.objects.filter(**query_filter).all()
         serializer = CrossValidationFoldImageSerializer(query_set, many=True)
         return Response(serializer.data)
+
+
+# Validation
+class ValidatorOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.groups.filter(name='Validators').exists() and request.method in ['GET']:
+            return True
+        return False
+
+class ImageValidationViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated, ValidatorOnly,)
+    queryset = ImageValidation.objects.all()
+    serializer_class = ImageValidationSerializer
+    filter_backends = (SearchFilter, OrderingFilter)
+    search_fields = (['dataset__name', 'project_id'])
+
+
+class ImageMetaDataValidationViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated, ValidatorOnly,)
+    queryset = ImageMetaDataValidation.objects.all()
+    serializer_class = ImageMetaDataValidationSerializer

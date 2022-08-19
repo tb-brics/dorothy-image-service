@@ -6,7 +6,8 @@ from re import I
 from django.urls import reverse
 from rest_framework import serializers
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
-    CrossValidationFold, CrossValidationFolder, CrossValidationCluster, CrossValidationFoldimages, DataQualityAnnotation
+    CrossValidationFold, CrossValidationFolder, CrossValidationCluster, CrossValidationFoldimages, \
+    DataQualityAnnotation, ImageValidation, ImageMetaDataValidation
 
 import json
 
@@ -336,3 +337,43 @@ class CrossValidationFoldImageSerializer(serializers.ModelSerializer):
         instance = CrossValidationFoldimages(**validated_data)
         instance.save()
         return instance
+
+
+class ImageMetaDataValidationSerializer(serializers.ModelSerializer):
+    dataset_name = serializers.CharField(source="dataset.name", read_only=True)
+
+    class Meta:
+        model = ImageMetaDataValidation
+        fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam', 'synthetic',
+                  'additional_information']
+
+
+class ImageValidationSerializer(serializers.ModelSerializer):
+    dataset_name = serializers.CharField(source="dataset.name", read_only=True)
+    metadata = ImageMetaDataValidationSerializer(required=True)
+    number_reports = serializers.IntegerField(default=0)
+    image_url = serializers.SerializerMethodField('get_image_url')
+
+    def count_reports(self, obj):
+        return obj.number_reports.count()
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        url = reverse('image_validation_file', kwargs={'project_id': obj.project_id})
+        return request.build_absolute_uri(url)
+
+    class Meta:
+        model = ImageValidation
+        fields = ['dataset_name',
+                  'image_url',
+                  'project_id',
+                  'insertion_date',
+                  'metadata',
+                  'date_acquisition',
+                  'number_reports']
+
+
+class ImageValidationFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImageValidation
+        fields = ('image',)

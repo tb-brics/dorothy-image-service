@@ -148,3 +148,41 @@ class DataQualityAnnotation(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['project_id'], name='data_quality_annotation_unique')
         ]
+
+
+class ImageValidation(models.Model):
+    dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=get_upload_path)
+    insertion_date = models.DateField(auto_now_add=True, auto_now=False)
+    project_id = models.CharField(max_length=10000, unique=True)
+    date_acquisition = models.DateField(auto_now_add=True, auto_now=False, blank=True, null=True)
+
+    def __str__(self):
+        return self.project_id
+
+    def save(self, *args, **kwargs):
+        dataset_name = str(self.dataset).lower().replace('_', '')
+        image_filename = str(os.path.splitext(os.path.basename(str(self.image)))[0])
+        hash = hashlib.sha256()
+        hash.update(self.image.read())
+        image_hash = hash.hexdigest().upper()
+        self.project_id = f"{dataset_name[:5]}_{image_filename}_{image_hash[:6]}"
+        super(ImageValidation, self).save(*args, **kwargs)
+
+
+class ImageMetaDataValidation(models.Model):
+    """Class for the meta data"""
+
+    GENDER_CHOICES = [('M', _('Male')), ('F', _('Female'))]
+
+    image = models.OneToOneField(ImageValidation,
+                                 related_name='metadata',
+                                 primary_key=True,
+                                 on_delete=models.CASCADE)
+    has_tb = models.BooleanField(null=True)
+    original_report = models.TextField(null=True)
+    gender = models.CharField(max_length=50, null=True, choices=GENDER_CHOICES)
+    age = models.IntegerField(null=True)
+    date_exam = models.DateField(auto_now_add=False, auto_now=False, blank=True, null=True)
+    synthetic = models.BooleanField(default=False)
+    additional_information = JSONField(null=True)

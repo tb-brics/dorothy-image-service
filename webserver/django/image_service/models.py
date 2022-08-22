@@ -27,6 +27,13 @@ def get_upload_path(instance, filename):
     return os.path.join(os.path.join(settings.MEDIA_ROOT, instance.dataset.name), filename)
 
 
+def get_cluster_upload_path(instance, filename):
+    directory_path = os.path.join(settings.MEDIA_ROOT, "clusters")
+    if not os.path.exists(directory_path):
+        os.mkdir(directory_path)
+    return os.path.join(directory_path, filename)
+
+
 class Image(models.Model):
     """Class for images"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
@@ -101,7 +108,7 @@ class ImageSampling(models.Model):
 class CrossValidationCluster(models.Model):
     cluster_id = models.CharField(max_length=20, unique=True)
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
-    file = models.FileField(upload_to='clusters/', default=None)
+    file = models.FileField(upload_to=get_cluster_upload_path, default=None)
 
     def __str__(self):
         return self.cluster_id
@@ -144,6 +151,7 @@ class DataQualityAnnotation(models.Model):
     insertion_date = models.DateField(auto_now_add=True, auto_now=False)
     reliable_radiography = models.BooleanField(null=True)
     minimum_interpretation_quality = models.BooleanField(null=True)
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['project_id'], name='data_quality_annotation_unique')

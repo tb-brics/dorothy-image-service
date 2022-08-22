@@ -218,7 +218,6 @@ class CrossValidationClusterFileView(generics.RetrieveAPIView):
     lookup_field = 'cluster_id'
     queryset = CrossValidationCluster.objects.all()
 
-
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         path = instance.file.path
@@ -226,7 +225,7 @@ class CrossValidationClusterFileView(generics.RetrieveAPIView):
             content = file.read()
         try:
             response = HttpResponse(content, content_type='application/octet-stream')
-            response['Content-Disposition'] =f"attachment; filename={instance.cluster_id}.pkl"
+            response['Content-Disposition'] = f"attachment; filename={instance.cluster_id}.pkl"
 
             return response
         except Exception as exc:
@@ -285,6 +284,7 @@ class ValidatorOnly(BasePermission):
         if request.user.groups.filter(name='Validators').exists() and request.method in ['GET']:
             return True
         return False
+
 
 class ImageValidationViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated, ValidatorOnly,)
@@ -361,7 +361,6 @@ class ImageValidationFileView(generics.RetrieveAPIView):
             return None
         else:
             return image_format
-
 
 
 class ImageMetaDataValidationViewSet(viewsets.ReadOnlyModelViewSet):

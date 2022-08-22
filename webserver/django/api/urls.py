@@ -41,7 +41,7 @@ router.register(r'image_validation', ImageValidationViewSet)
 urlpatterns = [
     re_path('^image/(?P<project_id>\w+)/$', ImageFileView.as_view(), name="image_file"),
     re_path('^image_validation/(?P<project_id>\w+)/$', ImageValidationFileView.as_view(), name="image_validation_file"),
-    re_path('^media/.*/(?P<cluster_id>\w+)/$', CrossValidationClusterFileView.as_view(), name="cluster_file"),
+    re_path('^cross_validation/cluster/(?P<cluster_id>\w+)/$', CrossValidationClusterFileView.as_view(), name="cluster_file"),
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),

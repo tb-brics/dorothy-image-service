@@ -257,10 +257,20 @@ class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
 
 
 class CrossValidationClusterSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField('get_file_url')
+
+    def get_file_url(self, obj):
+        request = self.context.get('request')
+        url = reverse('cluster_file', kwargs={'cluster_id': obj.cluster_id})
+        return request.build_absolute_uri(url)
+
     class Meta:
         model = CrossValidationCluster
-        fields = '__all__'
-
+        fields = [
+            "cluster_id",
+            "dataset",
+            "file_url"
+        ]
 
 class CrossValidationClusterFileSerializer(serializers.ModelSerializer):
     class Meta:

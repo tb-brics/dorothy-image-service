@@ -30,7 +30,10 @@ from .serializers import (DataSetSerializer,
                           DataQualityAnnotationSerializer,
                           ImageValidationSerializer,
                           ImageMetaDataValidationSerializer,
-                          ImageValidationFileSerializer)
+                          ImageValidationFileSerializer,
+                          ImageValidationPostSerializer,
+                          PostMetaDataValidationSerializer,
+                          Post_Image_AND_MetaDataValidationPostSerializer)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -367,3 +370,24 @@ class ImageMetaDataValidationViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated, ValidatorOnly,)
     queryset = ImageMetaDataValidation.objects.all()
     serializer_class = ImageMetaDataValidationSerializer
+
+
+class ImageValidationPostViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, UploaderOnly,)
+    queryset = ImageValidation.objects.all()
+    serializer_class = ImageValidationPostSerializer
+    http_method_names = ['post']
+
+
+class MetaDataValidationPostViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, UploaderOnly,)
+    queryset = ImageMetaDataValidation.objects.all()
+    serializer_class = PostMetaDataValidationSerializer
+    http_method_names = ['post']
+
+
+class Post_Image_AND_MetaDataValidationPostViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, UploaderOnly,)
+    queryset = ImageMetaDataValidation.objects.all()
+    serializer_class = Post_Image_AND_MetaDataValidationPostSerializer
+    http_method_names = ['post']

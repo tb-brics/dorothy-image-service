@@ -17,7 +17,10 @@ from image_service.views import (DataSetViewSet,
                                  CrossValidationClusterFileView,
                                  DataQualityAnnotationViewSet,
                                  ImageValidationViewSet,
-                                 ImageValidationFileView
+                                 ImageValidationFileView,
+                                 ImageValidationPostViewSet,
+                                 MetaDataValidationPostViewSet,
+                                 Post_Image_AND_MetaDataValidationPostViewSet
                                  )
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
@@ -37,6 +40,9 @@ router.register(r'cross_validation/fold', CrossValidationFoldViewSet)
 router.register(r'cross_validation/fold_image', CrossValidationFoldImagesViewSet)
 router.register(r'annotation', DataQualityAnnotationViewSet, basename='DataQualityAnnotation')
 router.register(r'image_validation', ImageValidationViewSet)
+router.register(r'post_image_validation', ImageValidationPostViewSet)
+router.register(r'post_metadata_validation', MetaDataValidationPostViewSet)
+router.register(r'post_image_and_metadata_validation', Post_Image_AND_MetaDataValidationPostViewSet)
 
 urlpatterns = [
     re_path('^image/(?P<project_id>\w+)/$', ImageFileView.as_view(), name="image_file"),

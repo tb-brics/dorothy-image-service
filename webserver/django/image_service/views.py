@@ -213,13 +213,14 @@ class CrossValidationClusterViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = CrossValidationCluster.objects.all()
     serializer_class = CrossValidationClusterSerializer
+    lookup_field = 'cluster_id'
     http_method_names = ['post', 'get']
 
 
 class CrossValidationClusterFileView(generics.RetrieveAPIView):
     serializer_class = CrossValidationClusterFileSerializer
-    lookup_field = 'cluster_id'
     queryset = CrossValidationCluster.objects.all()
+    lookup_field = 'cluster_id'
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

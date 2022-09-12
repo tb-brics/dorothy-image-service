@@ -50,6 +50,15 @@ class DataQualityAnnotationSerializer(serializers.ModelSerializer):
 
 class ImageMetaDataSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name", read_only=True)
+    gender = serializers.SerializerMethodField('get_gender')
+
+    def get_gender(self, obj):
+        if str.upper(obj.gender) == 'M':
+            return 'male'
+        elif str.upper(obj.gender) == 'F':
+            return 'female'
+        else:
+            return None
 
     class Meta:
         model = ImageMetaData

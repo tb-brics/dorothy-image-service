@@ -224,6 +224,8 @@ class PostMetaDataSerializer(serializers.ModelSerializer):
         instance.gender = validate_data.get("gender")
         instance.age = validate_data.get("age")
         instance.date_exam = validate_data.get("date_exam")
+        instance.additional_information = validate_data.get("additional_information")
+        instance.synthetic = validate_data.get("synthetic")
 
         instance.save()
         log.info('successfully saved to DB.')
@@ -232,7 +234,7 @@ class PostMetaDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImageMetaData
-        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']
+        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam', 'additional_information', 'synthetic']
 
 
 class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
@@ -254,6 +256,8 @@ class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
         instance.gender = validate_data.get("gender")
         instance.age = validate_data.get("age")
         instance.date_exam = validate_data.get("date_exam")
+        instance.additional_information = validate_data.get("additional_information")
+        instance.synthetic = validate_data.get("synthetic")
 
         instance.save()
         log.info('successfully saved to DB.')
@@ -262,7 +266,7 @@ class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImageMetaData
-        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']
+        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam', 'additional_information', 'synthetic']
 
 
 class CrossValidationClusterSerializer(serializers.ModelSerializer):

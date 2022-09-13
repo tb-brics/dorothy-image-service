@@ -55,7 +55,7 @@ class ImageMetaDataSerializer(serializers.ModelSerializer):
     def get_gender(self, obj):
         if str.upper(obj.gender) == 'M' or str.upper(obj.gender) == 'MALE':
             return 'male'
-        elif str.upper(obj.gender) == 'F' or str.upper(obj.gender) == 'FEMALEgit checkout':
+        elif str.upper(obj.gender) == 'F' or str.upper(obj.gender) == 'FEMALE':
             return 'female'
         else:
             return None

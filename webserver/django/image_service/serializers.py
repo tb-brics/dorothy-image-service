@@ -50,6 +50,15 @@ class DataQualityAnnotationSerializer(serializers.ModelSerializer):
 
 class ImageMetaDataSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name", read_only=True)
+    gender = serializers.SerializerMethodField('get_gender')
+
+    def get_gender(self, obj):
+        if str.upper(obj.gender) == 'M' or str.upper(obj.gender) == 'MALE':
+            return 'male'
+        elif str.upper(obj.gender) == 'F' or str.upper(obj.gender) == 'FEMALEgit checkout':
+            return 'female'
+        else:
+            return None
 
     class Meta:
         model = ImageMetaData
@@ -215,6 +224,8 @@ class PostMetaDataSerializer(serializers.ModelSerializer):
         instance.gender = validate_data.get("gender")
         instance.age = validate_data.get("age")
         instance.date_exam = validate_data.get("date_exam")
+        instance.additional_information = validate_data.get("additional_information")
+        instance.synthetic = validate_data.get("synthetic")
 
         instance.save()
         log.info('successfully saved to DB.')
@@ -223,7 +234,7 @@ class PostMetaDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImageMetaData
-        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']
+        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam', 'additional_information', 'synthetic']
 
 
 class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
@@ -245,6 +256,8 @@ class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
         instance.gender = validate_data.get("gender")
         instance.age = validate_data.get("age")
         instance.date_exam = validate_data.get("date_exam")
+        instance.additional_information = validate_data.get("additional_information")
+        instance.synthetic = validate_data.get("synthetic")
 
         instance.save()
         log.info('successfully saved to DB.')
@@ -253,7 +266,7 @@ class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImageMetaData
-        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']
+        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam', 'additional_information', 'synthetic']
 
 
 class CrossValidationClusterSerializer(serializers.ModelSerializer):

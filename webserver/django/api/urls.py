@@ -27,7 +27,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 
 router = routers.DefaultRouter()
 router.register(r'datasets', DataSetViewSet)
-router.register(r'images', ImageViewSet)
+router.register(r'images', ImageViewSet, basename='Image')
 router.register(r'report', ReportViewSet)
 router.register(r'imagesampling', ImageSamplingViewSet)
 router.register(r'post_dataset', DataSetPostViewSet)

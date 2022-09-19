@@ -12,6 +12,7 @@ class DataSet(models.Model):
     """Class for datasets"""
     name = models.CharField(unique=True, max_length=100)
     image_formats = models.CharField(max_length=50, default="")
+    public = models.BooleanField(default=True)
 
     @property
     def number_images(self):

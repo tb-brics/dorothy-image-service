@@ -72,10 +72,24 @@ class DataQualityAnnotationViewSet(viewsets.ModelViewSet):
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
-    queryset = Image.objects.all()
     serializer_class = ImageSerializer
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = (['dataset__name', 'project_id'])
+
+    def get_queryset(self):
+        queryset = Image.objects.all()
+    
+        group_names = [group['name'] for group in self.request.user.groups.all().values()]
+        
+        if "Validators" not in group_names:
+
+            print()
+
+            datasets = DataSet.objects.filter(public=True)
+            
+            return queryset.filter(dataset__in=datasets)
+        else:
+            return queryset
 
 
 class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):

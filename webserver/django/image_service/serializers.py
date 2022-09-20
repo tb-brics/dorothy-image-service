@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataSet
-        fields = ['name', 'image_formats', 'number_images']
+        fields = ['name', 'image_formats', 'number_images', 'public']
 
 
 class DataQualityAnnotationSerializer(serializers.ModelSerializer):
@@ -464,6 +464,8 @@ class PostMetaDataValidationSerializer(serializers.ModelSerializer):
         instance.gender = validate_data.get("gender")
         instance.age = validate_data.get("age")
         instance.date_exam = validate_data.get("date_exam")
+        instance.additional_information = validate_data.get("additional_information")
+        instance.synthetic = validate_data.get("synthetic")
 
         instance.save()
         log.info('successfully saved to DB.')
@@ -472,7 +474,7 @@ class PostMetaDataValidationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ImageMetaDataValidation
-        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']
+        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam', 'synthetic', 'additional_information']
 
 
 class Post_Image_AND_MetaDataValidationPostSerializer(serializers.ModelSerializer):
@@ -494,6 +496,8 @@ class Post_Image_AND_MetaDataValidationPostSerializer(serializers.ModelSerialize
         instance.gender = validate_data.get("gender")
         instance.age = validate_data.get("age")
         instance.date_exam = validate_data.get("date_exam")
+        instance.additional_information = validate_data.get("additional_information")
+        instance.synthetic = validate_data.get("synthetic")
 
         instance.save()
         log.info('successfully saved to DB.')
@@ -502,4 +506,4 @@ class Post_Image_AND_MetaDataValidationPostSerializer(serializers.ModelSerialize
 
     class Meta:
         model = ImageMetaDataValidation
-        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam']
+        fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam', 'synthetic', 'additional_information']

@@ -108,6 +108,7 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASS', 'R2E)5Dqd5ixizrU>+[mR'),
         'HOST': os.environ.get('DB_HOST', 'db'),
         'PORT': os.environ.get('DB_PORT', '5432'),
+        'DISABLE_SERVER_SIDE_CURSORS': True
     }
 }
 

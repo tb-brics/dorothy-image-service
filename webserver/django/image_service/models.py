@@ -38,7 +38,7 @@ def get_cluster_upload_path(instance, filename):
 class Image(models.Model):
     """Class for images"""
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=get_upload_path)
+    image = models.ImageField(upload_to=get_upload_path, max_length=500)
     insertion_date = models.DateField(auto_now_add=True, auto_now=False)
     project_id = models.CharField(max_length=10000, unique=True)
     date_acquisition = models.DateField(auto_now_add=True, auto_now=False, blank=True, null=True)

@@ -1,5 +1,9 @@
+import os.path
 from io import BytesIO
 
+from django.core.files import File
+from django.conf import settings
+from rest_framework import status
 from django.http import HttpResponse
 from rest_framework import viewsets
 from rest_framework import generics
@@ -78,15 +82,15 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = Image.objects.all()
-    
+
         group_names = [group['name'] for group in self.request.user.groups.all().values()]
-        
+
         if "Validators" not in group_names:
 
             print()
 
             datasets = DataSet.objects.filter(public=True)
-            
+
             return queryset.filter(dataset__in=datasets)
         else:
             return queryset
@@ -207,6 +211,24 @@ class ImagePostViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImagePostSerializer
     http_method_names = ['post']
+
+    def create(self, request, *args, **kwargs):
+        if request.data.get("image_path"):
+            path = os.path.join(os.getcwd(), settings.MEDIA_ROOT[1:], request.data.get("image_path"))
+            if not os.path.exists(path):
+                return Response({"error": "File not found."}, status=status.HTTP_404_NOT_FOUND)
+            with open(path, mode="rb") as file:
+                data = {}
+                data.update(request.data)
+                data.pop("image_path")
+                data["image"] = File(file, name=os.path.join(settings.MEDIA_ROOT, request.data.get("image_path")))
+                serializer = self.get_serializer(data=data)
+                serializer.is_valid(raise_exception=True)
+                self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return super().create(request, *args, **kwargs)
 
 
 class MetaDataPostViewSet(viewsets.ModelViewSet):

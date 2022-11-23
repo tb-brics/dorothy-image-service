@@ -168,6 +168,7 @@ class ImagePostSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name")
 
     def validate(self, data):
+        print("ta aqui")
         log.info('Starting dataset validation.')
         dataset_name = data.get("dataset").get("name")
         try:
@@ -187,7 +188,6 @@ class ImagePostSerializer(serializers.ModelSerializer):
 
         instance.dataset = dataset
         instance.image = validate_data.get("image")
-
         instance.save()
         log.info('Image content successfully saved to DB.')
 
@@ -285,6 +285,7 @@ class CrossValidationClusterSerializer(serializers.ModelSerializer):
             "dataset",
             "file_url"
         ]
+
 
 class CrossValidationClusterFileSerializer(serializers.ModelSerializer):
     class Meta:

@@ -36,6 +36,11 @@ RUN mkdir /imagesrep/clusters
 RUN chown -R www-data:datasets /imagesrep/clusters
 RUN chmod -R 775 /imagesrep/clusters
 
+# path for fake images
+RUN mkdir /imagesrep/fake_images
+RUN chown -R www-data:datasets /imagesrep/fake_images
+RUN chmod -R 775 /imagesrep/fake_images
+
 #Creating folder to contain static files.
 RUN mkdir -p /var/www/dorothy/static/
 RUN chown -R www-data:www-data /var/www/dorothy/static/

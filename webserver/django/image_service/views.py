@@ -214,7 +214,7 @@ class ImagePostViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         if request.data.get("image_path"):
-            path = os.path.join(os.getcwd(), settings.MEDIA_ROOT[1:], request.data.get("image_path"))
+            path = os.path.join(settings.MEDIA_ROOT, request.data.get("image_path"))
             if not os.path.exists(path):
                 return Response({"error": "File not found."}, status=status.HTTP_404_NOT_FOUND)
             with open(path, mode="rb") as file:

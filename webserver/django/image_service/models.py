@@ -48,7 +48,7 @@ class Image(models.Model):
 
     def save(self, *args, **kwargs):
         dataset_name = str(self.dataset).lower().replace('_', '')
-        image_filename = str(os.path.splitext(os.path.basename(str(self.image)))[0])
+        image_filename = str(os.path.splitext(os.path.basename(str(self.image)))[0]).replace(".", "_").replace("-", "_")
         hash = hashlib.sha256()
         hash.update(self.image.read())
         image_hash = hash.hexdigest().upper()

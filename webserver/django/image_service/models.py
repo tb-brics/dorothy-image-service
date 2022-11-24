@@ -47,12 +47,13 @@ class Image(models.Model):
         return self.project_id
 
     def save(self, *args, **kwargs):
-        dataset_name = str(self.dataset).lower().replace('_', '')
-        image_filename = str(os.path.splitext(os.path.basename(str(self.image)))[0]).replace(".", "_").replace("-", "_")
-        hash = hashlib.sha256()
-        hash.update(self.image.read())
-        image_hash = hash.hexdigest().upper()
-        self.project_id = f"{dataset_name[:5]}_{image_filename}_{image_hash[:6]}"
+        if not self.project_id:
+            dataset_name = str(self.dataset).lower().replace('_', '')
+            image_filename = str(os.path.splitext(os.path.basename(str(self.image)))[0]).replace(".", "_").replace("-", "_")
+            hash = hashlib.sha256()
+            hash.update(self.image.read())
+            image_hash = hash.hexdigest().upper()
+            self.project_id = f"{dataset_name[:5]}_{image_filename}_{image_hash[:6]}"
         super(Image, self).save(*args, **kwargs)
 
 

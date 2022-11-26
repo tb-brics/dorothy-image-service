@@ -11,23 +11,18 @@ class Command(BaseCommand):
 
     def handle(self,*args,**options):
 
-        images_ids = []
-        for image in Image.objects.all():
-            images_ids.append(image.project_id)
+        with open(options['json_file_path'], 'r') as file:
+            ranked_ids = json.load(file)
 
-        f = open(options['json_file_path'],)
+        for dic in ranked_ids:
+            rank_position = dic['rank_position']
+            project_id = dic['project_id']
 
-        data = json.load(f)
-
-        f.close()
-
-        for key in list(data.keys()):
-            img_id = [s for s in images_ids if data[key] in s][0]
             image_sampling__obj = ImageSampling(
-                image=Image.objects.filter(project_id=img_id)[0],
+                image=Image.objects.filter(project_id=project_id)[0],
                 insertion_date=str(date.today()),
-                rank_position=int(key))
+                rank_position=int(rank_position))
+
             image_sampling__obj.save()
-
-        print(f'Added {len(data)} images to sampling')
-
+        
+        print(f'Added {len(ranked_ids)} images to sampling')

@@ -41,6 +41,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('file_path', type=str,
                             help='Path to csv file with synthetic image information')
+        parser.add_argument('ignore_errors', type=bool, default=True,
+                            help='')
 
     def handle(self, *args, **options):
         new_csv_path = os.path.join("/".join(options["file_path"].split("/")[:-1]), "new_image_mapping.csv")
@@ -58,14 +60,18 @@ class Command(BaseCommand):
                 row["project_id"] = image_instance.project_id
                 csv_writer(new_csv_path, row)
             except Exception:
+                image_instance = None
                 self.stdout.write(self.style.ERROR(f"Failed to load image: %s" % row["raw_image_path"]))
-                raise RuntimeError("Failed to create image instance.")
+                if not options["ignore_errors"]:
+                    raise RuntimeError("Failed to create image instance.")
             try:
-                metadata = ImageMetaData()
-                metadata.image = image_instance
-                metadata.additional_information = json.dumps(row, default=str)
-                metadata.save()
+                if image_instance is not None:
+                    metadata = ImageMetaData()
+                    metadata.image = image_instance
+                    metadata.additional_information = json.dumps(row, default=str)
+                    metadata.save()
             except Exception:
                 self.stdout.write(self.style.ERROR(f"Failed to load image metadata from: %s" % row["raw_image_path"]))
-                raise RuntimeError("Failed to create image metadata instance")
-            self.stdout.write(self.style.SUCCESS(f"Synthetic images added!"))
+                if not options["ignore_errors"]:
+                    raise RuntimeError("Failed to create image metadata instance")
+        self.stdout.write(self.style.SUCCESS(f"Synthetic images added!"))

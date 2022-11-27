@@ -9,8 +9,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('json_file_path', type=str, help='Insert the path for the file which contains the images dictionary')
 
-    def handle(self,*args,**options):
-
+    def handle(self, *args, **options):
         with open(options['json_file_path'], 'r') as file:
             ranked_ids = json.load(file)
 
@@ -24,5 +23,5 @@ class Command(BaseCommand):
                 rank_position=int(rank_position))
 
             image_sampling__obj.save()
-        
+
         print(f'Added {len(ranked_ids)} images to sampling')

@@ -5,8 +5,8 @@ from django.core.management.base import BaseCommand
 from django.core.files import File
 from django.conf import settings
 from image_service.models import Image, DataSet, ImageMetaData
-# from webserver.django.image_service.models import Image, DataSet, ImageMetaData
 import json
+from base64 import b64encode
 
 
 def csv_reader(file_path: str) -> iter:
@@ -45,7 +45,8 @@ class Command(BaseCommand):
                             help='')
 
     def handle(self, *args, **options):
-        new_csv_path = os.path.join("/".join(options["file_path"].split("/")[:-1]), "new_image_mapping.csv")
+        new_csv_name = options["file_path"].split("/")[-1].replace(".csv", "") + "_project_id_mapping.csv"
+        new_csv_path = os.path.join("/".join(options["file_path"].split("/")[:-1]), new_csv_name)
         for row in csv_reader(options["file_path"]):
             try:
                 image_instance = Image()
@@ -55,6 +56,8 @@ class Command(BaseCommand):
                     raise FileNotFoundError("file not %s found" % os.path.exists(os.path.join(settings.MEDIA_ROOT, image_path)))
                 with open(os.path.join(settings.MEDIA_ROOT, image_path), mode="rb") as image_file:
                     image_instance.image = File(image_file, name=image_path)
+                    image_instance.project_id = b64encode(str(image_instance.image)[:499].encode("utf-8")).decode("utf-8"). \
+                        replace("\n", "")
                     image_instance.save()
                 row["dataset_name"] = row["dataset_name"].lower()
                 row["project_id"] = image_instance.project_id

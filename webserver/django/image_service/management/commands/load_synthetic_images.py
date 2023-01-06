@@ -6,7 +6,6 @@ from django.core.files import File
 from django.conf import settings
 from image_service.models import Image, DataSet, ImageMetaData
 import json
-from base64 import b64encode
 from hashlib import sha256
 
 
@@ -60,17 +59,16 @@ class Command(BaseCommand):
                     hash = sha256()
                     hash.update(image_file.read())
                     image_hash = hash.hexdigest().upper()
-                    path_base_64 = b64encode("".join(image_path.split("/")[-3:]).encode("utf-8")).decode("utf-8"). \
-                        replace("\n", "")
-                    image_instance.project_id = f"{str(image_instance.dataset)[:5]}_{image_hash[:6]}_{path_base_64[-24:]}"
-                    print(image_instance.project_id)
+                    path_hash = sha256()
+                    path_hash.update("".join(image_path.split("/")[-4:]).encode("utf-8"))
+                    image_instance.project_id = f"{str(image_instance.dataset)[:5]}_{image_hash[:6]}_{path_hash.hexdigest().upper()[:16]}"
                     image_instance.save()
                 row["dataset_name"] = row["dataset_name"].lower()
                 row["project_id"] = image_instance.project_id
                 csv_writer(new_csv_path, row)
-            except Exception:
+            except Exception as error:
                 image_instance = None
-                self.stdout.write(self.style.ERROR(f"Failed to load image: %s" % row["raw_image_path"]))
+                self.stdout.write(self.style.ERROR(f"Failed to load image: %s. Error: %s" % (row["raw_image_path"], error.args)))
                 if not options["ignore_errors"]:
                     raise RuntimeError("Failed to create image instance.")
             try:

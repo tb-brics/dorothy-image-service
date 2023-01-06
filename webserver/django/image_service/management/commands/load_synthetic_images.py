@@ -7,6 +7,7 @@ from django.conf import settings
 from image_service.models import Image, DataSet, ImageMetaData
 import json
 from base64 import b64encode
+from hashlib import sha256
 
 
 def csv_reader(file_path: str) -> iter:
@@ -56,8 +57,13 @@ class Command(BaseCommand):
                     raise FileNotFoundError("file not %s found" % os.path.exists(os.path.join(settings.MEDIA_ROOT, image_path)))
                 with open(os.path.join(settings.MEDIA_ROOT, image_path), mode="rb") as image_file:
                     image_instance.image = File(image_file, name=image_path)
-                    image_instance.project_id = b64encode(str(image_instance.image)[:499].encode("utf-8")).decode("utf-8"). \
+                    hash = sha256()
+                    hash.update(image_file.read())
+                    image_hash = hash.hexdigest().upper()
+                    path_base_64 = b64encode("".join(image_path.split("/")[-3:]).encode("utf-8")).decode("utf-8"). \
                         replace("\n", "")
+                    image_instance.project_id = f"{str(image_instance.dataset)[:5]}_{image_hash[:6]}_{path_base_64[-24:]}"
+                    print(image_instance.project_id)
                     image_instance.save()
                 row["dataset_name"] = row["dataset_name"].lower()
                 row["project_id"] = image_instance.project_id

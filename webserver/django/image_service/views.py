@@ -78,7 +78,7 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ImageSerializer
     filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = (['dataset__name', 'project_id'])
+    search_fields = (['=dataset__name', '=project_id'])
 
     def get_queryset(self):
         queryset = Image.objects.all()

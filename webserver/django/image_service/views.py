@@ -106,8 +106,8 @@ class ReportViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
-    filter_backends = (SearchFilter)
-    search_fields = (['image__project_id', 'performed_by'])
+    filter_backends = [SearchFilter]
+    search_fields = ['image__project_id', 'performed_by']
 
 
 class ImageSamplingViewSet(viewsets.ReadOnlyModelViewSet):

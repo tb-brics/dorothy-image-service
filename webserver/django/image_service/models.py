@@ -1,6 +1,7 @@
 """Importing models module to create models classes"""
 import hashlib
 import os
+from datetime import date
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -13,6 +14,10 @@ class DataSet(models.Model):
     name = models.CharField(unique=True, max_length=100)
     image_formats = models.CharField(max_length=50, default="")
     public = models.BooleanField(default=True)
+    synthetic = models.BooleanField(default=False)
+    absolute_path_location = models.CharField(max_length=2000, default=None, null=True)
+    last_update = models.DateField(default=date.today)
+    current_state_hash = models.CharField(max_length=500, default=None, null=True)
 
     @property
     def number_images(self):
@@ -20,6 +25,11 @@ class DataSet(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.last_update = date.today()
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
 
 def get_upload_path(instance, filename):
@@ -72,6 +82,7 @@ class ImageMetaData(models.Model):
     age = models.IntegerField(null=True)
     date_exam = models.DateField(auto_now_add=False, auto_now=False, blank=True, null=True)
     synthetic = models.BooleanField(default=False)
+    image_hash = models.CharField(max_length=500, null=True, default=None)
     additional_information = JSONField(null=True)
 
 

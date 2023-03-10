@@ -2,6 +2,7 @@ import os.path
 from io import BytesIO
 
 from django.core.files import File
+from django.core.paginator import Paginator
 from django.conf import settings
 from rest_framework import status
 from django.http import HttpResponse
@@ -86,15 +87,10 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
         group_names = [group['name'] for group in self.request.user.groups.all().values()]
 
         if "Validators" not in group_names:
-
-            print()
-
             datasets = DataSet.objects.filter(public=True)
-
             return queryset.filter(dataset__in=datasets)
         else:
             return queryset
-
 
 class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)

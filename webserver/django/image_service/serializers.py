@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataSet
-        fields = ['name', 'image_formats', 'number_images', 'public']
+        fields = ['name', 'image_formats', 'number_images', 'public', 'synthetic', 'absolute_path_location', 'current_state_hash']
 
 
 class DataQualityAnnotationSerializer(serializers.ModelSerializer):
@@ -64,7 +64,7 @@ class ImageMetaDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageMetaData
         fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam', 'synthetic',
-                  'additional_information']
+                  'additional_information', 'image_hash']
 
 
 class ImageSerializer(serializers.ModelSerializer):

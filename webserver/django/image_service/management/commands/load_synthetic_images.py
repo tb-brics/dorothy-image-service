@@ -68,7 +68,7 @@ class Command(BaseCommand):
             image_path = row.get("image_path", None) or row.get("raw_image_path")
             image_data = {}
             image_path = image_path.replace("//", "/").replace(options["replace_path"], "synthetic/")
-            image_data['image_path'] = image_path
+            image_data['image_path'] = row.get("image_path", None) or row.get("raw_image_path")
             image_data['dataset_name'] = dataset.name
             image_data['test'] = row['test']
             image_data['sort'] = row['sort']

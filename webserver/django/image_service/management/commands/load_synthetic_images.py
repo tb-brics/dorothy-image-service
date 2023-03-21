@@ -41,6 +41,8 @@ class Command(BaseCommand):
                             help='Load images into this dataset name')
         parser.add_argument('replace_path', type=str, default="/home/brics/public/brics_data/",
                             help='Load images into this dataset name')
+        parser.add_argument('build_hash_with', type=str, default="/home/brics/public/brics_data/",
+                            help='Load images into this dataset name')
         parser.add_argument('ignore_errors', type=bool, default=True,
                             help='')
 
@@ -82,21 +84,21 @@ class Command(BaseCommand):
                     hashsha = sha256()
                     image_content = image_file.read()
                     hashsha.update(image_content)
-                    dataset_hash.update(image_content)
                     image_hash = hashsha.hexdigest().upper()
                     dataset_name = dataset.name.lower().replace('_', '')
-                    image_filename = str(os.path.splitext(os.path.basename(str(image_instance.image)))[0]).replace(".",
-                                                                                                                   "_").replace(
-                        "-",
-                        "_")
-                    image_project_id = f"{dataset_name[:5]}_{image_filename}_{image_hash[:6]}"
+                    image_identifier = str(row[options['build_hash_with']]).replace(".", "_").replace("__", "_")
+                    image_identifier_hash = sha256()
+                    image_identifier_hash.update(image_identifier.encode('utf-8'))
+                    image_project_id = f"{dataset_name[:5]}_{image_identifier_hash.hexdigest().upper()[:9]}_{image_hash[:6]}"
                     image_data["project_id"] = image_project_id
                     image_instance.project_id = image_project_id
                     try:
                         if not Image.objects.filter(project_id=image_project_id):
                             image_instance.save()
+                            dataset_hash.update(image_content)
                             self.stdout.write(self.style.SUCCESS(f"Synthetic image created: %s" % image_instance.project_id))
                         else:
+                            image_instance = None
                             self.stdout.write(self.style.WARNING(f"Duplicated iproject_id: %s" % image_project_id))
                     except Exception as error:
                         image_instance = None

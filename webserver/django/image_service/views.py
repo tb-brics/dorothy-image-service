@@ -100,6 +100,7 @@ class ImagePaginatedRequest(generics.RetrieveAPIView, LimitOffsetPagination):
     filter_backends = SearchFilter
     lookup_field = 'dataset_name'
     queryset = Image.objects.all()
+    default_limit=100
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

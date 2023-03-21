@@ -5,7 +5,7 @@ from csv import DictReader, DictWriter
 from django.core.management.base import BaseCommand
 from django.core.files import File
 from django.conf import settings
-from image_service.models import Image, DataSet, ImageMetaData
+from image_service.models import Image, DataSet, ImageMetaData, DatasetCrossValidationFolds
 import json
 from hashlib import sha256
 
@@ -24,17 +24,12 @@ def csv_reader(file_path: str) -> iter:
 
 def csv_writer(file_path: str, value: dict) -> None:
     fieldnames = list(value.keys())
-    if not os.path.exists(file_path):
-        os.mknod(file_path)
-    if os.path.getsize(file_path) == 0:
-        with open(file_path, 'w+', newline='') as csvfile:
-            writer = DictWriter(csvfile, fieldnames=fieldnames)
+    file_exists = os.path.exists(file_path)
+    with open(file_path, 'a') as csvfile:
+        writer = DictWriter(csvfile, fieldnames=fieldnames, delimiter=',', lineterminator='\n')
+        if not file_exists or csvfile.tell() == 0:
             writer.writeheader()
-            writer.writerow(value)
-    else:
-        with open(file_path, 'w+') as csvfile:
-            writer = DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow(value)
+        writer.writerow(value)
 
 
 class Command(BaseCommand):
@@ -43,6 +38,8 @@ class Command(BaseCommand):
         parser.add_argument('file_path', type=str,
                             help='Path to csv file with synthetic image information')
         parser.add_argument('force_dataset', type=str,
+                            help='Load images into this dataset name')
+        parser.add_argument('replace_path', type=str, default="/home/brics/public/brics_data/",
                             help='Load images into this dataset name')
         parser.add_argument('ignore_errors', type=bool, default=True,
                             help='')
@@ -63,37 +60,52 @@ class Command(BaseCommand):
             dataset.current_state_hash = None
             dataset.save()
         else:
-            dataset = DataSet.objects.get(name=options["force_dataset"].lower()).first()
+            dataset = DataSet.objects.get(name=options["force_dataset"].lower())
+        dataset_hash = sha256()
         for row in csv_reader(input_file_path):
+            image_path = row.get("image_path", None) or row.get("raw_image_path")
+            image_data = {}
+            image_path = image_path.replace("//", "/").replace(options["replace_path"], "synthetic/")
+            image_data['image_path'] = image_path
+            image_data['dataset_name'] = dataset.name
+            image_data['test'] = row['test']
+            image_data['sort'] = row['sort']
+            image_data['type'] = row['type']
+            image_data['dataset_type'] = 'synthetic'
             try:
                 image_instance = Image()
                 image_instance.dataset = dataset
-                image_path = row["raw_image_path"].replace("//", "/").replace("/home/brics/public/brics_data/", "synthetic/")
                 if not os.path.exists(os.path.join(settings.MEDIA_ROOT, image_path)):
-                    raise FileNotFoundError("file not %s found" % os.path.exists(os.path.join(settings.MEDIA_ROOT, image_path)))
+                    raise FileNotFoundError("file not found in path: %s" % os.path.join(settings.MEDIA_ROOT, image_path))
                 with open(os.path.join(settings.MEDIA_ROOT, image_path), mode="rb") as image_file:
                     image_instance.image = File(image_file, name=image_path)
                     hashsha = sha256()
-                    hashsha.update(image_file.read())
+                    image_content = image_file.read()
+                    hashsha.update(image_content)
+                    dataset_hash.update(image_content)
                     image_hash = hashsha.hexdigest().upper()
                     dataset_name = dataset.name.lower().replace('_', '')
-                    image_filename = str(os.path.splitext(os.path.basename(str(image_instance.image)))[0]).replace(".", "_").replace("-",
-                                                                                                                           "_")
+                    image_filename = str(os.path.splitext(os.path.basename(str(image_instance.image)))[0]).replace(".",
+                                                                                                                   "_").replace(
+                        "-",
+                        "_")
                     image_project_id = f"{dataset_name[:5]}_{image_filename}_{image_hash[:6]}"
+                    image_data["project_id"] = image_project_id
                     image_instance.project_id = image_project_id
                     try:
-                        image_instance.save()
-                        self.stdout.write(self.style.SUCCESS(f"Synthetic image created: %s" % image_instance.project_id))
+                        if not Image.objects.filter(project_id=image_project_id):
+                            image_instance.save()
+                            self.stdout.write(self.style.SUCCESS(f"Synthetic image created: %s" % image_instance.project_id))
+                        else:
+                            self.stdout.write(self.style.WARNING(f"Duplicated iproject_id: %s" % image_project_id))
                     except Exception as error:
                         image_instance = None
                         self.stdout.write(
                             self.style.WARNING(f"Possible duplicated image. Error: %s" % error.args))
-                row["dataset_name"] = dataset.name
-                row["project_id"] = image_project_id
-                csv_writer(new_csv_path, row)
+                csv_writer(new_csv_path, image_data)
             except Exception as error:
                 image_instance = None
-                self.stdout.write(self.style.ERROR(f"Failed to load image: %s. Error: %s" % (row["raw_image_path"], error.args)))
+                self.stdout.write(self.style.ERROR(f"Failed to load image: %s. Error: %s" % (image_path, error.args)))
                 if not options["ignore_errors"]:
                     raise RuntimeError("Failed to create image instance.")
             try:
@@ -105,7 +117,26 @@ class Command(BaseCommand):
                     metadata.image_hash = image_hash
                     metadata.save()
             except Exception:
-                self.stdout.write(self.style.ERROR(f"Failed to load image metadata from: %s" % row["raw_image_path"]))
+                self.stdout.write(self.style.ERROR(f"Failed to load image metadata from: %s" % image_path))
                 if not options["ignore_errors"]:
                     raise RuntimeError("Failed to create image metadata instance")
+
+        try:
+            dataset.current_state_hash = dataset_hash.hexdigest().upper()
+            dataset.save()
+        except Exception:
+            self.stdout.write(self.style.ERROR(f"Failed to update dataset hash"))
+            if not options["ignore_errors"]:
+                raise RuntimeError("Failed to update dataset hash")
+        try:
+            fold = DatasetCrossValidationFolds()
+            fold.dataset = dataset
+            fold.file_type = "csv"
+            with open(new_csv_path, mode="rb") as fold_file:
+                fold.file = File(fold_file, name=new_csv_path)
+                fold.save()
+        except Exception as error:
+            self.stdout.write(self.style.ERROR(f"Failed create dataset cross validation file: %s" % error.args))
+            if not options["ignore_errors"]:
+                raise RuntimeError("Failed create dataset cross validation file")
         self.stdout.write(self.style.SUCCESS(f"Synthetic images added!"))

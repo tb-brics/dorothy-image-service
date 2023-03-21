@@ -1,20 +1,21 @@
 import os.path
 from io import BytesIO
 
-from rest_framework.pagination import LimitOffsetPagination
-from django.core.files import File
-from django.core.paginator import Paginator
-from django.conf import settings
-from rest_framework import status
-from django.http import HttpResponse
-from rest_framework import viewsets
-from rest_framework import generics
-from rest_framework.views import APIView
-from django.shortcuts import render
-from django.views.generic.list import ListView
-
 from PIL import Image as PilImage
 from PIL import ImageOps
+from django.conf import settings
+from django.core.files import File
+from django.http import HttpResponse
+from django.shortcuts import render
+from rest_framework import generics
+from rest_framework import status
+from rest_framework import viewsets
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import BasePermission
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.core.paginator import Paginator
 
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
     DatasetCrossValidationFolds, CrossValidationCluster, \
@@ -40,10 +41,6 @@ from .serializers import (DataSetSerializer,
                           PostMetaDataValidationSerializer,
                           Post_Image_AND_MetaDataValidationPostSerializer,
                           DatasetCrossValidationGetFoldsFileSerializer)
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import BasePermission
 
 
 def loginPage(request):
@@ -55,6 +52,7 @@ class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = DataSet.objects.all()
     serializer_class = DataSetSerializer
+    pagination_class = None
 
 
 class DataQualityAnnotationViewSet(viewsets.ModelViewSet):
@@ -63,6 +61,7 @@ class DataQualityAnnotationViewSet(viewsets.ModelViewSet):
     # filter_backends = SearchFilter
     # search_fields = (['project_id'])
     http_method_names = ['post', 'get']
+    pagination_class = None
 
     def get_queryset(self):
         """
@@ -81,6 +80,7 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ImageSerializer
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = (['=dataset__name', '=project_id'])
+    pagination_class = None
 
     def get_queryset(self):
         queryset = Image.objects.all()
@@ -94,37 +94,38 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
             return queryset
 
 
-class ImagePaginatedRequest(generics.RetrieveAPIView, LimitOffsetPagination):
+class ImagePaginatedRequest(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ImageSerializer
     filter_backends = SearchFilter
     lookup_field = 'dataset_name'
-    queryset = Image.objects.all()
-    default_limit=100
+    default_limit = 100
+    limit_query_param = 'limit'
+    offset_query_param = 'offset'
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({"request": self.request})
         return context
 
-    def retrieve(self, request, dataset_name, *args, **kwargs):
-        queryset = self.queryset
+    def list(self, request, dataset_name, *args, **kwargs):
+        queryset = Image.objects.filter(dataset__name=dataset_name)
         group_names = [group['name'] for group in self.request.user.groups.all().values()]
         if group_names:
             if "Validators" not in group_names:
                 datasets = DataSet.objects.filter(public=True)
                 queryset = queryset.filter(dataset__in=datasets)
-        queryset = queryset.filter(dataset__name=dataset_name)
         results = self.paginate_queryset(queryset)
         serializer = self.get_serializer(data=results, many=True)
         serializer.is_valid()
-        return self.get_paginated_response(serializer.data)
+        return self.get_paginated_response(data=serializer.data)
 
 
 class ImageMetaDataViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = ImageMetaData.objects.all()
     serializer_class = ImageMetaDataSerializer
+    pagination_class = None
 
 
 class ReportViewSet(viewsets.ModelViewSet):
@@ -133,6 +134,7 @@ class ReportViewSet(viewsets.ModelViewSet):
     serializer_class = ReportSerializer
     filter_backends = [SearchFilter]
     search_fields = ['image__project_id', 'performed_by']
+    pagination_class = None
 
 
 class ImageSamplingViewSet(viewsets.ReadOnlyModelViewSet):
@@ -141,12 +143,14 @@ class ImageSamplingViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ImageSamplingSerializer
     filter_backends = (SearchFilter, OrderingFilter)
     ordering_fields = (['rank_position'])
+    pagination_class = None
 
 
 class ImageFileView(generics.RetrieveAPIView):
     serializer_class = ImageFileSerializer
     lookup_field = 'project_id'
     queryset = Image.objects.all()
+    pagination_class = None
 
     def retrieve(self, request, *args, **kwargs):
         gray_scale = request.query_params.get("gray_scale", False)
@@ -229,6 +233,7 @@ class DataSetPostViewSet(viewsets.ModelViewSet):
     queryset = DataSet.objects.all()
     serializer_class = DataSetPostSerializer
     http_method_names = ['post']
+    pagination_class = None
 
 
 class ImagePostViewSet(viewsets.ModelViewSet):
@@ -236,6 +241,7 @@ class ImagePostViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImagePostSerializer
     http_method_names = ['post']
+    pagination_class = None
 
     def create(self, request, *args, **kwargs):
         if request.data.get("image_path"):
@@ -261,6 +267,7 @@ class MetaDataPostViewSet(viewsets.ModelViewSet):
     queryset = ImageMetaData.objects.all()
     serializer_class = PostMetaDataSerializer
     http_method_names = ['post']
+    pagination_class = None
 
 
 class Post_Image_AND_MetaDataPostViewSet(viewsets.ModelViewSet):
@@ -268,6 +275,7 @@ class Post_Image_AND_MetaDataPostViewSet(viewsets.ModelViewSet):
     queryset = ImageMetaData.objects.all()
     serializer_class = Post_Image_AND_MetaDataPostSerializer
     http_method_names = ['post']
+    pagination_class = None
 
 
 class CrossValidationClusterViewSet(viewsets.ModelViewSet):
@@ -276,6 +284,7 @@ class CrossValidationClusterViewSet(viewsets.ModelViewSet):
     serializer_class = CrossValidationClusterSerializer
     lookup_field = 'cluster_id'
     http_method_names = ['post', 'get']
+    pagination_class = None
 
 
 class DatasetCrossValidationListFoldFilesView(viewsets.ReadOnlyModelViewSet):
@@ -284,6 +293,7 @@ class DatasetCrossValidationListFoldFilesView(viewsets.ReadOnlyModelViewSet):
     serializer_class = DatasetCrossValidationListFoldsSerializer
     search_fields = ['=dataset_name']
     queryset = DatasetCrossValidationFolds.objects.all()
+    pagination_class = None
 
     def get_queryset(self):
         queryset = DatasetCrossValidationFolds.objects.all()
@@ -302,6 +312,7 @@ class DatasetCrossValidationGetFoldFile(generics.RetrieveAPIView):
     serializer_class = DatasetCrossValidationGetFoldsFileSerializer
     queryset = DatasetCrossValidationFolds.objects.all()
     lookup_field = 'dataset_name'
+    pagination_class = None
 
     def retrieve(self, request, dataset_name, *args, **kwargs):
         fold: DatasetCrossValidationFolds = self.queryset.filter(dataset__name=dataset_name).first()
@@ -321,6 +332,7 @@ class CrossValidationClusterFileView(generics.RetrieveAPIView):
     serializer_class = CrossValidationClusterFileSerializer
     queryset = CrossValidationCluster.objects.all()
     lookup_field = 'cluster_id'
+    pagination_class = None
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -350,12 +362,14 @@ class ImageValidationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ImageValidationSerializer
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = (['dataset__name', 'project_id'])
+    pagination_class = None
 
 
 class ImageValidationFileView(generics.RetrieveAPIView):
     serializer_class = ImageValidationFileSerializer
     lookup_field = 'project_id'
     queryset = ImageValidation.objects.all()
+    pagination_class = None
 
     def retrieve(self, request, *args, **kwargs):
         gray_scale = request.query_params.get("gray_scale", False)
@@ -425,6 +439,7 @@ class ImageMetaDataValidationViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated, ValidatorOnly,)
     queryset = ImageMetaDataValidation.objects.all()
     serializer_class = ImageMetaDataValidationSerializer
+    pagination_class = None
 
 
 class ImageValidationPostViewSet(viewsets.ModelViewSet):
@@ -432,13 +447,14 @@ class ImageValidationPostViewSet(viewsets.ModelViewSet):
     queryset = ImageValidation.objects.all()
     serializer_class = ImageValidationPostSerializer
     http_method_names = ['post']
-
+    pagination_class = None
 
 class MetaDataValidationPostViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, UploaderOnly,)
     queryset = ImageMetaDataValidation.objects.all()
     serializer_class = PostMetaDataValidationSerializer
     http_method_names = ['post']
+    pagination_class = None
 
 
 class Post_Image_AND_MetaDataValidationPostViewSet(viewsets.ModelViewSet):
@@ -446,3 +462,4 @@ class Post_Image_AND_MetaDataValidationPostViewSet(viewsets.ModelViewSet):
     queryset = ImageMetaDataValidation.objects.all()
     serializer_class = Post_Image_AND_MetaDataValidationPostSerializer
     http_method_names = ['post']
+    pagination_class = None

@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   db:
     image: postgres:13.0
@@ -13,18 +12,19 @@ services:
     image: tbbrics/dorothy-image-service-web:latest
     command: ./run_server.sh
     volumes:
-      - ImagesRep:/imagesrep
+      - ./imagesrep:/imagesrep
     depends_on:
       - db
     ports:
       - "80:8000"
     environment:
       DEBUG: 'true'
-  mlflow:
-    image: tbbrics/dorothy-mlflow-service:latest
-    command: ./run_mlflow.sh
-    ports:
-      - "5000:80"
+    restart: on-failure
+#  mlflow:
+#    image: patrickfbraz/dorothy-mlflow-service:0.1.3
+#    command: ./run_mlflow.sh
+#    ports:
+#      - "5000:80"
 #  nginx:
 #    image: tbbrics/dorothy-image-service-web:latest
 #    command: ./server/run_nginx.sh

@@ -6,7 +6,7 @@ from re import I
 from django.urls import reverse
 from rest_framework import serializers
 from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
-    CrossValidationFold, CrossValidationFolder, CrossValidationCluster, CrossValidationFoldimages, \
+    DatasetCrossValidationFolds, CrossValidationCluster, \
     DataQualityAnnotation, ImageValidation, ImageMetaDataValidation
 
 import json
@@ -28,10 +28,29 @@ def get_time_hash(length: int) -> str:
 log = logging.getLogger(__name__)
 
 
+class DatasetCrossValidationListFoldsSerializer:
+    fold_file_url = serializers.SerializerMethodField('get_fold_url')
+
+    class Meta:
+        model = DatasetCrossValidationFolds
+        fields = ["fold_file_url, dataset__name", "file_type", "updated_at"]
+
+    def get_fold_url(self, obj):
+        request = self.context.get('request')
+        url = reverse('dataset_cross_validation_file', kwargs={'project_id': obj.dataset_name})
+        return request.build_absolute_uri(url)
+
+
+class DatasetCrossValidationGetFoldsFileSerializer:
+    class Meta:
+        model = DatasetCrossValidationFolds
+        fields = ["file"]
+
+
 class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataSet
-        fields = ['name', 'image_formats', 'number_images', 'public']
+        fields = ['name', 'image_formats', 'number_images', 'public', 'synthetic', 'absolute_path_location', 'current_state_hash']
 
 
 class DataQualityAnnotationSerializer(serializers.ModelSerializer):
@@ -64,7 +83,7 @@ class ImageMetaDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageMetaData
         fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam', 'synthetic',
-                  'additional_information']
+                  'additional_information', 'image_hash']
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -291,77 +310,6 @@ class CrossValidationClusterFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CrossValidationCluster
         fields = ('file',)
-
-
-class CrossValidationFolderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CrossValidationFolder
-        fields = '__all__'
-
-    def validate(self, data):
-        # Verificar se o cluster_id existe
-        if data.get("cluster_id"):
-            return data
-        else:
-            log.error("Missing required field 'cluster_id'.")
-            raise serializers.ValidationError(
-                {"cluster_id": "Missing required field 'cluster_id'."},
-                code=http.HTTPStatus.BAD_REQUEST)
-
-    def create(self, validated_data):
-        instance = CrossValidationFolder()
-        cluster_id = validated_data.get("cluster_id")
-        instance.folder_id = cluster_id.cluster_id + "_folder_" + get_time_hash(8)
-        instance.cluster_id = cluster_id
-        instance.save()
-        return instance
-
-
-class CrossValidationFoldSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CrossValidationFold
-        fields = '__all__'
-
-    def validate(self, data):
-        if not data.get("folder_id"):
-            log.error("Missing required field 'folder_id'.")
-            raise serializers.ValidationError(
-                {"fold": "Missing required field 'folder_id'."},
-                code=http.HTTPStatus.BAD_REQUEST)
-        return data
-
-    def create(self, validated_data):
-        instance = CrossValidationFold()
-        if validated_data.get("fold_id"):
-            instance.fold_id = validated_data.get("fold_id")
-        else:
-            instance.fold_id = validated_data.get("folder_id").folder_id + "_fold_" + get_time_hash(8)
-        instance.folder_id = validated_data.get("folder_id")
-        instance.save()
-        return instance
-
-
-class CrossValidationFoldImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CrossValidationFoldimages
-        fields = '__all__'
-
-    def validate(self, data):
-        is_train_data = data.get("train")
-        is_test_data = data.get("test")
-        is_validation_data = data.get("validation")
-
-        if (is_train_data and is_test_data) or (is_train_data and is_validation_data) or (is_validation_data and is_test_data):
-            log.error("The Image can only assume one role inside a fold (train, test, or validation).")
-            raise serializers.ValidationError(
-                {"project_id": "The Image can only assume one role inside a fold (train, test, or validation)."},
-                code=http.HTTPStatus.BAD_REQUEST)
-        return data
-
-    def create(self, validated_data):
-        instance = CrossValidationFoldimages(**validated_data)
-        instance.save()
-        return instance
 
 
 class ImageMetaDataValidationSerializer(serializers.ModelSerializer):

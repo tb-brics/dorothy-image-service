@@ -1,6 +1,7 @@
 """Importing models module to create models classes"""
 import hashlib
 import os
+from datetime import date
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -13,6 +14,10 @@ class DataSet(models.Model):
     name = models.CharField(unique=True, max_length=100)
     image_formats = models.CharField(max_length=50, default="")
     public = models.BooleanField(default=True)
+    synthetic = models.BooleanField(default=False)
+    absolute_path_location = models.CharField(max_length=2000, default=None, null=True)
+    last_update = models.DateField(default=date.today)
+    current_state_hash = models.CharField(max_length=500, default=None, null=True)
 
     @property
     def number_images(self):
@@ -20,6 +25,11 @@ class DataSet(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.last_update = date.today()
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
 
 def get_upload_path(instance, filename):
@@ -72,6 +82,7 @@ class ImageMetaData(models.Model):
     age = models.IntegerField(null=True)
     date_exam = models.DateField(auto_now_add=False, auto_now=False, blank=True, null=True)
     synthetic = models.BooleanField(default=False)
+    image_hash = models.CharField(max_length=500, null=True, default=None)
     additional_information = JSONField(null=True)
 
 
@@ -107,6 +118,20 @@ class ImageSampling(models.Model):
     rank_position = models.IntegerField(null=True)
 
 
+class DatasetCrossValidationFolds(models.Model):
+    VALIDATION_FOLDS_TYPES = [('pkl', _('Pickle')), ('csv', _('CSV'))]
+
+    dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
+    file = models.FileField(upload_to=get_cluster_upload_path, null=False)
+    file_type = models.CharField(max_length=3, choices=VALIDATION_FOLDS_TYPES, null=True)
+    updated_at = models.DateField(default=date.today, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['dataset'], name='cross_validation_folds_dataset_id_unique')
+        ]
+
+
 class CrossValidationCluster(models.Model):
     cluster_id = models.CharField(max_length=20, unique=True)
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
@@ -118,30 +143,6 @@ class CrossValidationCluster(models.Model):
     def save(self, *args, **kwargs):
         self.file.name = f"{self.cluster_id}"
         super(CrossValidationCluster, self).save(*args, **kwargs)
-
-
-class CrossValidationFolder(models.Model):
-    folder_id = models.CharField(max_length=30, unique=True)
-    cluster_id = models.ForeignKey(CrossValidationCluster, to_field='cluster_id', db_column='cluster_id',
-                                   on_delete=models.CASCADE)
-
-
-class CrossValidationFold(models.Model):
-    fold_id = models.CharField(max_length=50, unique=True)
-    folder_id = models.ForeignKey(CrossValidationFolder, to_field='folder_id', db_column='folder_id', on_delete=models.CASCADE)
-
-
-class CrossValidationFoldimages(models.Model):
-    fold_id = models.ForeignKey(CrossValidationFold, to_field='fold_id', db_column='fold_id', on_delete=models.CASCADE)
-    project_id = models.ForeignKey(Image, to_field='project_id', db_column='project_id', on_delete=models.CASCADE)
-    train = models.BooleanField(default=False)
-    test = models.BooleanField(default=False)
-    validation = models.BooleanField(default=False)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['project_id', 'fold_id'], name='cross_validation_fold_image_unique')
-        ]
 
 
 class DataQualityAnnotation(models.Model):

@@ -41,10 +41,13 @@ if DEBUG or ALLOW_LOCALHOST:
     ALLOWED_HOSTS.append('django-server')
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://*', 'http://*', 'http://*.lps.ufrj.br', 'https://*.lps.ufrj.br'
+    'https://*', 'http://*', 'http://*.lps.ufrj.br', 'https://*.lps.ufrj.br', "http://localhost/"
 ]
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_DOMAIN = '.lps.ufrj.br'
+CSRF_COOKIE_SECURE = True
+if DEBUG:
+    CSRF_COOKIE_DOMAIN = ''
+else:
+    CSRF_COOKIE_DOMAIN = '.lps.ufrj.br'
 
 # Application definition
 
@@ -65,6 +68,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
+    'PAGE_SIZE': 20,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
 }
 
 MIDDLEWARE = [

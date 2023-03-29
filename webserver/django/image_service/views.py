@@ -17,8 +17,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.core.paginator import Paginator
 
-from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
-    DatasetCrossValidationFolds, CrossValidationCluster, \
+from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, ImageFold, \
     DataQualityAnnotation, ImageValidation, ImageMetaDataValidation
 from .serializers import (DataSetSerializer,
                           ImageSerializer,
@@ -30,9 +29,6 @@ from .serializers import (DataSetSerializer,
                           ImagePostSerializer,
                           PostMetaDataSerializer,
                           Post_Image_AND_MetaDataPostSerializer,
-                          CrossValidationClusterFileSerializer,
-                          CrossValidationClusterSerializer,
-                          DatasetCrossValidationListFoldsSerializer,
                           DataQualityAnnotationSerializer,
                           ImageValidationSerializer,
                           ImageMetaDataValidationSerializer,
@@ -40,12 +36,36 @@ from .serializers import (DataSetSerializer,
                           ImageValidationPostSerializer,
                           PostMetaDataValidationSerializer,
                           Post_Image_AND_MetaDataValidationPostSerializer,
-                          DatasetCrossValidationGetFoldsFileSerializer)
+                          ImageFoldSerializer)
 
 
 def loginPage(request):
     context = {}
     return render(request, 'accounts/login.html', context)
+
+
+class ImageFoldAPIList(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ImageFoldSerializer
+    http_method_names = ['get']
+    default_limit = 1000
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
+    def list(self, request, dataset_name, *args, **kwargs):
+        queryset = ImageFold.objects.filter(image__dataset__name=dataset_name)
+        group_names = [group['name'] for group in self.request.user.groups.all().values()]
+        if group_names:
+            if "Validators" not in group_names:
+                datasets = DataSet.objects.filter(public=True)
+                queryset = queryset.filter(dataset__in=datasets)
+        results = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(data=results, many=True)
+        serializer.is_valid()
+        return self.get_paginated_response(data=serializer.data)
 
 
 class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
@@ -278,76 +298,6 @@ class Post_Image_AND_MetaDataPostViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 
-class CrossValidationClusterViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
-    queryset = CrossValidationCluster.objects.all()
-    serializer_class = CrossValidationClusterSerializer
-    lookup_field = 'cluster_id'
-    http_method_names = ['post', 'get']
-    pagination_class = None
-
-
-class DatasetCrossValidationListFoldFilesView(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsAuthenticated,)
-    filter_backends = (SearchFilter, OrderingFilter)
-    serializer_class = DatasetCrossValidationListFoldsSerializer
-    search_fields = ['=dataset_name']
-    queryset = DatasetCrossValidationFolds.objects.all()
-    pagination_class = None
-
-    def get_queryset(self):
-        queryset = DatasetCrossValidationFolds.objects.all()
-
-        group_names = [group['name'] for group in self.request.user.groups.all().values()]
-
-        if "Validators" not in group_names:
-            datasets = DataSet.objects.filter(public=True)
-            return queryset.filter(dataset__in=datasets)
-        else:
-            return queryset
-
-
-class DatasetCrossValidationGetFoldFile(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = DatasetCrossValidationGetFoldsFileSerializer
-    queryset = DatasetCrossValidationFolds.objects.all()
-    lookup_field = 'dataset_name'
-    pagination_class = None
-
-    def retrieve(self, request, dataset_name, *args, **kwargs):
-        fold: DatasetCrossValidationFolds = self.queryset.filter(dataset__name=dataset_name).first()
-        path = fold.file.path
-        with open(path, "rb") as file:
-            content = file.read()
-        try:
-            response = HttpResponse(content, content_type='application/octet-stream')
-            response['Content-Disposition'] = f"attachment; filename={fold.dataset.name}.{fold.file_type}"
-
-            return response
-        except Exception as exc:
-            return Response({'error': f'Could not read the file. ({exc})'})
-
-
-class CrossValidationClusterFileView(generics.RetrieveAPIView):
-    serializer_class = CrossValidationClusterFileSerializer
-    queryset = CrossValidationCluster.objects.all()
-    lookup_field = 'cluster_id'
-    pagination_class = None
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        path = instance.file.path
-        with open(path, "rb") as file:
-            content = file.read()
-        try:
-            response = HttpResponse(content, content_type='application/octet-stream')
-            response['Content-Disposition'] = f"attachment; filename={instance.cluster_id}.pkl"
-
-            return response
-        except Exception as exc:
-            return Response({'error': f'Could not read the file. ({exc})'})
-
-
 # Validation
 class ValidatorOnly(BasePermission):
     def has_permission(self, request, view):
@@ -448,6 +398,7 @@ class ImageValidationPostViewSet(viewsets.ModelViewSet):
     serializer_class = ImageValidationPostSerializer
     http_method_names = ['post']
     pagination_class = None
+
 
 class MetaDataValidationPostViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, UploaderOnly,)

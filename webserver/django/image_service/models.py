@@ -9,6 +9,20 @@ from django.db.models import JSONField
 from django.conf import settings
 
 
+class Fold(models.Model):
+    """Class for folds"""
+    test = models.IntegerField()
+    sort = models.IntegerField()
+    kind = models.CharField(default="10-Fold", max_length=7)
+
+    @property
+    def name(self):
+        return f"fold_{self.test}_{self.sort}"
+
+    def __str__(self):
+        return str(self.name)
+
+
 class DataSet(models.Model):
     """Class for datasets"""
     name = models.CharField(unique=True, max_length=100)
@@ -67,6 +81,13 @@ class Image(models.Model):
         super(Image, self).save(*args, **kwargs)
 
 
+class ImageFold(models.Model):
+    IMAGE_FOLD_ROLE = [('test', _('Test')), ('train', _('Train')), ('validation', _('Validation'))]
+
+    image = models.ForeignKey(Image, on_delete=models.CASCADE)
+    fold = models.ForeignKey(Fold, on_delete=models.CASCADE)
+    role = models.CharField(max_length=10, choices=IMAGE_FOLD_ROLE, null=True)
+
 class ImageMetaData(models.Model):
     """Class for the meta data"""
 
@@ -117,32 +138,6 @@ class ImageSampling(models.Model):
     insertion_date = models.DateField(auto_now_add=False, auto_now=False)
     rank_position = models.IntegerField(null=True)
 
-
-class DatasetCrossValidationFolds(models.Model):
-    VALIDATION_FOLDS_TYPES = [('pkl', _('Pickle')), ('csv', _('CSV'))]
-
-    dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
-    file = models.FileField(upload_to=get_cluster_upload_path, null=False)
-    file_type = models.CharField(max_length=3, choices=VALIDATION_FOLDS_TYPES, null=True)
-    updated_at = models.DateField(default=date.today, null=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['dataset'], name='cross_validation_folds_dataset_id_unique')
-        ]
-
-
-class CrossValidationCluster(models.Model):
-    cluster_id = models.CharField(max_length=20, unique=True)
-    dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE)
-    file = models.FileField(upload_to=get_cluster_upload_path, default=None)
-
-    def __str__(self):
-        return self.cluster_id
-
-    def save(self, *args, **kwargs):
-        self.file.name = f"{self.cluster_id}"
-        super(CrossValidationCluster, self).save(*args, **kwargs)
 
 
 class DataQualityAnnotation(models.Model):

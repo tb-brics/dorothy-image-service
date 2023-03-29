@@ -9,7 +9,5 @@ pytest-xdist
 djangorestframework
 django_extensions
 git+https://github.com/tb-brics/dorothy-data-reader.git
-mlflow
-mlflow[pipelines]
-mlflow[extras]
-mlflow-skinny
+jupyter==1.0.0
+

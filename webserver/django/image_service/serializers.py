@@ -1,15 +1,13 @@
-import http
+import json
 import logging
 from hashlib import sha1
 from time import time
-from re import I
+
 from django.urls import reverse
 from rest_framework import serializers
-from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, \
-    DatasetCrossValidationFolds, CrossValidationCluster, \
-    DataQualityAnnotation, ImageValidation, ImageMetaDataValidation
 
-import json
+from .models import DataSet, Image, ImageMetaData, Report, ImageSampling, ImageFold, \
+    DataQualityAnnotation, ImageValidation, ImageMetaDataValidation
 
 
 def get_time_hash(length: int) -> str:
@@ -26,25 +24,6 @@ def get_time_hash(length: int) -> str:
 
 
 log = logging.getLogger(__name__)
-
-
-class DatasetCrossValidationListFoldsSerializer:
-    fold_file_url = serializers.SerializerMethodField('get_fold_url')
-
-    class Meta:
-        model = DatasetCrossValidationFolds
-        fields = ["fold_file_url, dataset__name", "file_type", "updated_at"]
-
-    def get_fold_url(self, obj):
-        request = self.context.get('request')
-        url = reverse('dataset_cross_validation_file', kwargs={'project_id': obj.dataset_name})
-        return request.build_absolute_uri(url)
-
-
-class DatasetCrossValidationGetFoldsFileSerializer:
-    class Meta:
-        model = DatasetCrossValidationFolds
-        fields = ["file"]
 
 
 class DataSetSerializer(serializers.ModelSerializer):
@@ -84,6 +63,17 @@ class ImageMetaDataSerializer(serializers.ModelSerializer):
         model = ImageMetaData
         fields = ['dataset_name', 'gender', 'age', 'has_tb', 'original_report', 'date_exam', 'synthetic',
                   'additional_information', 'image_hash']
+
+
+class ImageFoldSerializer(serializers.ModelSerializer):
+    fold_name = serializers.ReadOnlyField(source='fold.name')
+    fold_test = serializers.ReadOnlyField(source='fold.test')
+    fold_sort = serializers.ReadOnlyField(source='fold.sort')
+    image_project_id = serializers.ReadOnlyField(source='image.project_id')
+
+    class Meta:
+        model = ImageFold
+        fields = ['fold_test', 'fold_sort', 'fold_name', 'role', 'image_project_id']
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -187,7 +177,6 @@ class ImagePostSerializer(serializers.ModelSerializer):
     dataset_name = serializers.CharField(source="dataset.name")
 
     def validate(self, data):
-        print("ta aqui")
         log.info('Starting dataset validation.')
         dataset_name = data.get("dataset").get("name")
         try:
@@ -287,29 +276,6 @@ class Post_Image_AND_MetaDataPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageMetaData
         fields = ['image', 'has_tb', 'original_report', 'gender', 'age', 'date_exam', 'additional_information', 'synthetic']
-
-
-class CrossValidationClusterSerializer(serializers.ModelSerializer):
-    file_url = serializers.SerializerMethodField('get_file_url')
-
-    def get_file_url(self, obj):
-        request = self.context.get('request')
-        url = reverse('cluster_file', kwargs={'cluster_id': obj.cluster_id})
-        return request.build_absolute_uri(url)
-
-    class Meta:
-        model = CrossValidationCluster
-        fields = [
-            "cluster_id",
-            "dataset",
-            "file_url"
-        ]
-
-
-class CrossValidationClusterFileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CrossValidationCluster
-        fields = ('file',)
 
 
 class ImageMetaDataValidationSerializer(serializers.ModelSerializer):

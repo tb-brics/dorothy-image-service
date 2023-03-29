@@ -8,6 +8,8 @@ services:
       - POSTGRES_PASSWORD=R2E)5Dqd5ixizrU>+[mR
     volumes:
         - PostgresDB:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
   dorothy-image:
     image: tbbrics/dorothy-image-service-web:latest
     command: ./run_server.sh
@@ -17,6 +19,18 @@ services:
       - db
     ports:
       - "80:8000"
+    environment:
+      DEBUG: 'true'
+    restart: on-failure
+  notebook:
+    image: tbbrics/dorothy-image-service-web:latest
+    command: python manage.py shell_plus --notebook
+    volumes:
+      - ./imagesrep:/imagesrep
+    depends_on:
+      - dorothy-image
+    ports:
+      - "8888:8888"
     environment:
       DEBUG: 'true'
     restart: on-failure

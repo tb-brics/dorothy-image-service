@@ -80,7 +80,10 @@ class ImageFoldSerializer(serializers.ModelSerializer):
 
     def get_image_absolute_path(self, obj):
         metadata: ImageMetaData = ImageMetaData.objects.get(image=obj.image)
-        return metadata.additional_information.get("image_path")
+        additional_information = metadata.additional_information or {}
+        if not isinstance(additional_information, dict):
+            additional_information = json.loads(additional_information)
+        return additional_information.get("image_path")
 
     def get_image_url(self, obj):
         request = self.context.get('request')
@@ -89,7 +92,7 @@ class ImageFoldSerializer(serializers.ModelSerializer):
 
     def image_has_tb(self, obj):
         metadata: ImageMetaData = ImageMetaData.objects.get(image=obj.image)
-        additional_information = metadata.additional_information
+        additional_information = metadata.additional_information or {}
         if not isinstance(additional_information, dict):
             additional_information = json.loads(additional_information)
         has_tb = metadata.has_tb or additional_information.get("target")

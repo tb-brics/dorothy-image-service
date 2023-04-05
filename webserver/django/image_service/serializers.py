@@ -70,10 +70,30 @@ class ImageFoldSerializer(serializers.ModelSerializer):
     fold_test = serializers.ReadOnlyField(source='fold.test')
     fold_sort = serializers.ReadOnlyField(source='fold.sort')
     image_project_id = serializers.ReadOnlyField(source='image.project_id')
+    image_path = serializers.SerializerMethodField('get_image_absolute_path')
+    image_url = serializers.SerializerMethodField('get_image_url')
+    has_tb = serializers.SerializerMethodField('image_has_tb')
 
     class Meta:
         model = ImageFold
-        fields = ['fold_test', 'fold_sort', 'fold_name', 'role', 'image_project_id']
+        fields = ['fold_test', 'fold_sort', 'fold_name', 'role', 'image_project_id', 'image_path', 'image_url', 'has_tb']
+
+    def get_image_absolute_path(self, obj):
+        metadata: ImageMetaData = ImageMetaData.objects.get(image=obj.image)
+        return metadata.additional_information.get("image_path")
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        url = reverse('image_file', kwargs={'project_id': obj.image.project_id})
+        return request.build_absolute_uri(url)
+
+    def image_has_tb(self, obj):
+        metadata: ImageMetaData = ImageMetaData.objects.get(image=obj.image)
+        has_tb = metadata.has_tb or metadata.additional_information.get("target")
+        if has_tb:
+            return 1
+        else:
+            return 0
 
 
 class ImageSerializer(serializers.ModelSerializer):

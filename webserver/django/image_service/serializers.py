@@ -89,7 +89,10 @@ class ImageFoldSerializer(serializers.ModelSerializer):
 
     def image_has_tb(self, obj):
         metadata: ImageMetaData = ImageMetaData.objects.get(image=obj.image)
-        has_tb = metadata.has_tb or metadata.additional_information.get("target")
+        additional_information = metadata.additional_information
+        if not isinstance(additional_information, dict):
+            additional_information = json.loads(additional_information)
+        has_tb = metadata.has_tb or additional_information.get("target")
         if has_tb:
             return 1
         else:

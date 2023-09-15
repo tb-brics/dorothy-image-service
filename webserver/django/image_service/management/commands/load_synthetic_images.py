@@ -5,7 +5,7 @@ from csv import DictReader, DictWriter
 from django.core.management.base import BaseCommand
 from django.core.files import File
 from django.conf import settings
-from image_service.models import Image, DataSet, ImageMetaData, DatasetCrossValidationFolds
+from image_service.models import Image, DataSet, ImageMetaData
 import json
 from hashlib import sha256
 
@@ -130,15 +130,15 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Failed to update dataset hash"))
             if not options["ignore_errors"]:
                 raise RuntimeError("Failed to update dataset hash")
-        try:
-            fold = DatasetCrossValidationFolds()
-            fold.dataset = dataset
-            fold.file_type = "csv"
-            with open(new_csv_path, mode="rb") as fold_file:
-                fold.file = File(fold_file, name=new_csv_path)
-                fold.save()
-        except Exception as error:
-            self.stdout.write(self.style.ERROR(f"Failed create dataset cross validation file: %s" % error.args))
-            if not options["ignore_errors"]:
-                raise RuntimeError("Failed create dataset cross validation file")
+        # try:
+        #     fold = DatasetCrossValidationFolds()
+        #     fold.dataset = dataset
+        #     fold.file_type = "csv"
+        #     with open(new_csv_path, mode="rb") as fold_file:
+        #         fold.file = File(fold_file, name=new_csv_path)
+        #         fold.save()
+        # except Exception as error:
+        #     self.stdout.write(self.style.ERROR(f"Failed create dataset cross validation file: %s" % error.args))
+            # if not options["ignore_errors"]:
+            #     raise RuntimeError("Failed create dataset cross validation file")
         self.stdout.write(self.style.SUCCESS(f"Synthetic images added!"))
